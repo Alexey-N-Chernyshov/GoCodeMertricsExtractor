@@ -19,15 +19,11 @@ public class GoParser
 
 PARSER_END(GoParser)
 
-TOKEN_MGR_DECLS:
-{
-  static int linenumber = 0;
-}
-
-SKIP:   /* Whitespace */
+/* Whitespace */
+SKIP:
 {
   "\t"
-| "\n" { linenumber++; }
+| "\n"
 | "\r"
 | " "
 }
