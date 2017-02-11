@@ -16,14 +16,14 @@ public class MainApp {
         }
 
         GoParser parser = new GoParser(new FileInputStream(args[0]));
-        SimpleNode root = GoParser.Program();
+        SimpleNode root = parser.Program();
 
         System.out.println("Abstract Syntax Tree:");
         root.dump(" ");
 
         System.out.println();
         System.out.println("Program:");
-        PrintVisitor pv = new PrintVisitor();
+        PrintVisitor pv = new PrintVisitor(System.out);
         root.jjtAccept(pv, null);
     }
 

@@ -4,6 +4,7 @@
 
 options
 {
+  STATIC = false;
   IGNORE_CASE = false;
   MULTI = true;        // in multi mode the type of the node is derived from the name of the node
   VISITOR = true;
@@ -19,22 +20,135 @@ public class GoParser
 
 PARSER_END(GoParser)
 
-/* Whitespace */
 SKIP:
 {
+/* Whitespace */
   "\t"
 | "\n"
 | "\r"
 | " "
+/* comments */
+| < "//" (~["\r", "\n"])* >
+| < "/*" > : ML_COMMENT_STATE
 }
 
+<ML_COMMENT_STATE> SKIP :
+{
+  < "*/" > : DEFAULT
+| < ~[] >
+}
+
+/* tokens are:
+ * 1) keywords
+ * 2) operators and delimiters
+ * 3) identifiers
+ * 4) literarls
+ */
 TOKEN:
 {
-  <LPAREN: "(">
-| <RPAREN: ")">
-| <ADD_OP: "+" | "-">
-| <MULT_OP: "*" | "/">
-| <NUMBER: (["0"-"9"])+>
+  <TOKEN_BREAK: "break">
+| <TOKEN_DEFAULT: "default">
+| <TOKEN_FUNC: "func">
+| <TOKEN_INTERFACE: "interface">
+| <TOKEN_SELECT: "select">
+| <TOKEN_CASE: "case">
+| <TOKEN_DEFER: "defer">
+| <TOKEN_GO: "go">
+| <TOKEN_MAP: "map">
+| <TOKEN_STRUCT: "struct">
+| <TOKEN_CHAN: "chan">
+| <TOKEN_ELSE: "else">
+| <TOKEN_GOTO: "goto">
+| <TOKEN_PACKAGE: "package">
+| <TOKEN_SWITCH: "switch">
+| <TOKEN_CONST: "const">
+| <TOKEN_FALLTROUGH: "fallthrough">
+| <TOKEN_IF: "if">
+| <TOKEN_RANGE: "range">
+| <TOKEN_TYPE: "type">
+| <TOKEN_CONTINUE: "continue">
+| <TOKEN_FOR: "for">
+| <TOKEN_IMPORT: "import">
+| <TOKEN_RETURN: "return">
+| <TOKEN_VAR: "var">
+
+| <TOKEN_PLUS: "+">
+| <TOKEN_AND: "&">
+| <TOKEN_PLUSEQUSL: "+=">
+| <TOKEN_ANDEQUAL: "&=">
+| <TOKEN_ANDAND: "&&">
+| <TOKEN_EQUALEQUAL: "==">
+| <TOKEN_NOTEQUAL: "!=">
+| <TOKEN_LPAREN: "(">
+| <TOKEN_RPAREN: ")">
+| <TOKEN_MINUS: "-">
+| <TOKEN_OR: "|">
+| <TOKEN_MINUSTOKEN_EQUAL: "-=">
+| <TOKEN_OREQUAL: "|=">
+| <TOKEN_OROR: "||">
+| <TOKEN_LESS: "<">
+| <TOKEN_LESSOREQUAL: "<=">
+| <TOKEN_LSQUAREPAREN: "[">
+| <TOKEN_RSQUAREPAREN: "]">
+| <TOKEN_MULT: "*">
+| <TOKEN_XOR: "^">
+| <TOKEN_MULEQUAL: "*=">
+| <TOKEN_XOREQUAL: "^=">
+| <TOKEN_LESSMINUS: "<-">
+| <TOKEN_GREATER: ">">
+| <TOKEN_GREATEREQUAL: ">=">
+| <TOKEN_LCURLYBRACE: "{">
+| <TOKEN_RCURLYBRACE: "}">
+| <TOKEN_DIV: "/">
+| <TOKEN_LESSLESS: "<<">
+| <TOKEN_DIVEQUAL: "/=">
+| <TOKEN_LESSLESSEQUAL: "<<=">
+| <TOKEN_PLUSPLUS: "++">
+| <TOKEN_EQUAL: "=">
+| <TOKEN_COLONEQUAL: ":=">
+| <TOKEN_COMMA: ",">
+| <TOKEN_SEMICOLON: ";">
+| <TOKEN_PERCENT: "%">
+| <TOKEN_GREATERGREATER: ">>">
+| <TOKEN_PERCENTEQUAL: "%=">
+| <TOKEN_GREATERGREATEREQUAL: ">>=">
+| <TOKEN_MINNUSMINUS: "--">
+| <TOKEN_EXCLAMATION: "!">
+| <TOKEN_ELLIPSIS: "...">
+| <TOKEN_DOT: ".">
+| <TOKEN_COLON: ":">
+| <TOKEN_ANDXOR: "&^">
+| <TOKEN_ANDXOREQUAL: "&^=">
+
+/* Literals */
+| <TOKEN_DECIMAL_INTEGER_LITERAL: ["1"-"9"](["0"-"9"])*>
+| <TOKEN_OCTAL_INTEGER_LITERAL: "0"(["0"-"7"])+>
+| <TOKEN_HEX_INTEGER_LITERAL: ("0x"|"0X")(["0"-"9", "a"-"f", "A"-"F"])+>
+| <TOKEN_FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<DECIMAL_EXPONENT>)?
+                                  | (["0"-"9"])+ <DECIMAL_EXPONENT>
+                                  | "." (["0"-"9"])+ (<DECIMAL_EXPONENT>)? >
+    | <#DECIMAL_EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+| <TOKEN_IDENTIFIER: ["a"-"z", "A"-"Z", "_"](["a"-"z", "A"-"Z", "_", "0"-"9"])*>
+}
+
+
+void IntegerLiteral() : { Token t; }
+{
+  t = <TOKEN_DECIMAL_INTEGER_LITERAL> { jjtThis.value = t.image; }
+| t = <TOKEN_OCTAL_INTEGER_LITERAL> { jjtThis.value = t.image; }
+| t = <TOKEN_HEX_INTEGER_LITERAL> { jjtThis.value = t.image; }
+}
+
+void FloatLiteral() : { Token t; }
+{
+  t = <TOKEN_FLOATING_POINT_LITERAL> { jjtThis.value = t.image; }
+}
+
+void Literal() #void : {}
+{
+  LOOKAHEAD(2)
+  IntegerLiteral()
+  | FloatLiteral()
 }
 
 
@@ -47,7 +161,7 @@ void Expression() #void : { Token t; }
 {
   Term()
   (
-    t = <ADD_OP> Term() { jjtThis.value = t.image; } #AddOperator(2)
+    t = <TOKEN_PLUS> Term() { jjtThis.value = t.image; } #AddOperator(2)
   )*
 }
 
@@ -55,18 +169,13 @@ void Term() #void : { Token t; }
 {
   Factor()
   (
-    t = <MULT_OP> Factor() { jjtThis.value = t.image; } #MultOperator(2)
+    t = <TOKEN_MULT> Factor() { jjtThis.value = t.image; } #MultOperator(2)
   )*
 }
 
 void Factor() #void : {}
 {
-  (<LPAREN> Expression() #Exp(1) <RPAREN>
-  | Number()
+  (<TOKEN_LPAREN> Expression() #Exp(1) <TOKEN_RPAREN>
+  | Literal()
   )
-}
-
-void Number() : { Token t; }
-{
-  t = <NUMBER> { jjtThis.value = t.image; }
 }
