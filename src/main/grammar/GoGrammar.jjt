@@ -1,0 +1,76 @@
+/**
+ * @author Alexey Chernyshov
+ */
+
+options
+{
+  IGNORE_CASE = false;
+  MULTI = true;        // in multi mode the type of the node is derived from the name of the node
+  VISITOR = true;
+}
+
+PARSER_BEGIN(GoParser)
+
+package com.github.alexey_n_chernyshov;
+
+public class GoParser
+{
+}
+
+PARSER_END(GoParser)
+
+TOKEN_MGR_DECLS:
+{
+  static int linenumber = 0;
+}
+
+SKIP:   /* Whitespace */
+{
+  "\t"
+| "\n" { linenumber++; }
+| "\r"
+| " "
+}
+
+TOKEN:
+{
+  <LPAREN: "(">
+| <RPAREN: ")">
+| <ADD_OP: "+" | "-">
+| <MULT_OP: "*" | "/">
+| <NUMBER: (["0"-"9"])+>
+}
+
+
+SimpleNode Program() : {}
+{
+  Expression() <EOF> { return jjtThis; }
+}
+
+void Expression() #void : { Token t; }
+{
+  Term()
+  (
+    t = <ADD_OP> Term() { jjtThis.value = t.image; } #AddOperator(2)
+  )*
+}
+
+void Term() #void : { Token t; }
+{
+  Factor()
+  (
+    t = <MULT_OP> Factor() { jjtThis.value = t.image; } #MultOperator(2)
+  )*
+}
+
+void Factor() #void : {}
+{
+  (<LPAREN> Expression() #Exp(1) <RPAREN>
+  | Number()
+  )
+}
+
+void Number() : { Token t; }
+{
+  t = <NUMBER> { jjtThis.value = t.image; }
+}
