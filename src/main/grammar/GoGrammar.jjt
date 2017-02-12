@@ -192,7 +192,7 @@ void Literal() #void : {}
 
 SimpleNode Program() : {}
 {
-  Mult() <EOF> { return jjtThis; }
+  OrOrOperator() <EOF> { return jjtThis; }
 }
 
 void Operand() #void : {}
@@ -258,7 +258,7 @@ void Term() #void : {}
 | <TOKEN_LPAREN> PrimaryExpression() <TOKEN_RPAREN>
 }
 
-void Mult() #void : { Token t; }
+void MultOperators() #void : { Token t; }
 {
   Term() (
     LOOKAHEAD(2)
@@ -267,7 +267,43 @@ void Mult() #void : { Token t; }
   | (t = <TOKEN_PERCENT> Term() { jjtThis.value = t.image; }        #DivInt(2) )
   | (t = <TOKEN_LESSLESS> Term() { jjtThis.value = t.image; }       #ShiftLeft(2) )
   | (t = <TOKEN_GREATERGREATER> Term() { jjtThis.value = t.image; } #ShiftRight(2) )
-  | (t = <TOKEN_AND> Term() { jjtThis.value = t.image; } #And(2) )
-  | (t = <TOKEN_ANDXOR> Term() { jjtThis.value = t.image; } #AndXor(2) )
+  | (t = <TOKEN_AND> Term() { jjtThis.value = t.image; }            #And(2) )
+  | (t = <TOKEN_ANDXOR> Term() { jjtThis.value = t.image; }         #AndXor(2) )
+  )*
+}
+
+void AddOperators() #void : { Token t; }
+{
+  MultOperators() (
+    (t = <TOKEN_PLUS> MultOperators() { jjtThis.value = t.image; }  #Add(2) )
+  | (t = <TOKEN_MINUS> MultOperators() { jjtThis.value = t.image; } #Sub(2) )
+  | (t = <TOKEN_OR> MultOperators() { jjtThis.value = t.image; }    #Or(2)  )
+  | (t = <TOKEN_XOR> MultOperators() { jjtThis.value = t.image; }   #Xor(2) )
+  )*
+}
+
+void RelOperators() #void : { Token t; }
+{
+  AddOperators() (
+    (t = <TOKEN_EQUALEQUAL> AddOperators() { jjtThis.value = t.image; }   #Equal(2) )
+  | (t = <TOKEN_NOTEQUAL> AddOperators() { jjtThis.value = t.image; }     #NotEqual(2) )
+  | (t = <TOKEN_LESS> AddOperators() { jjtThis.value = t.image; }         #Less(2) )
+  | (t = <TOKEN_LESSOREQUAL> AddOperators() { jjtThis.value = t.image; }  #LessEqual(2) )
+  | (t = <TOKEN_GREATER> AddOperators() { jjtThis.value = t.image; }      #Greater(2) )
+  | (t = <TOKEN_GREATEREQUAL> AddOperators() { jjtThis.value = t.image; } #GreaterEqual(2) )
+  )*
+}
+
+void AndAndOperator() #void : { Token t; }
+{
+  RelOperators() (
+    (t = <TOKEN_ANDAND> RelOperators() { jjtThis.value = t.image; } #AndAnd(2) )
+  )*
+}
+
+void OrOrOperator() #void : { Token t; }
+{
+  AndAndOperator() (
+    (t = <TOKEN_OROR> AndAndOperator() { jjtThis.value = t.image; } #OrOr(2) )
   )*
 }
