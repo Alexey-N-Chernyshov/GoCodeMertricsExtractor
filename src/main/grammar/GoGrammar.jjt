@@ -38,14 +38,10 @@ SKIP:
 | < ~[] >
 }
 
-/* tokens are:
- * 1) keywords
- * 2) operators and delimiters
- * 3) identifiers
- * 4) literarls
- */
+/* tokens are */
 TOKEN:
 {
+/* keywords */
   <TOKEN_BREAK: "break">
 | <TOKEN_DEFAULT: "default">
 | <TOKEN_FUNC: "func">
@@ -72,6 +68,7 @@ TOKEN:
 | <TOKEN_RETURN: "return">
 | <TOKEN_VAR: "var">
 
+/* operators and delimiters */
 | <TOKEN_PLUS: "+">
 | <TOKEN_AND: "&">
 | <TOKEN_PLUSEQUSL: "+=">
@@ -122,12 +119,35 @@ TOKEN:
 
 /* Literals */
 | <TOKEN_DECIMAL_INTEGER_LITERAL: ["1"-"9"](["0"-"9"])*>
+
 | <TOKEN_OCTAL_INTEGER_LITERAL: "0"(["0"-"7"])+>
+
 | <TOKEN_HEX_INTEGER_LITERAL: ("0x"|"0X")(["0"-"9", "a"-"f", "A"-"F"])+>
+
 | <TOKEN_FLOATING_POINT_LITERAL: (["0"-"9"])+ "." (["0"-"9"])* (<DECIMAL_EXPONENT>)?
                                   | (["0"-"9"])+ <DECIMAL_EXPONENT>
                                   | "." (["0"-"9"])+ (<DECIMAL_EXPONENT>)? >
     | <#DECIMAL_EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
+
+| <TOKEN_IMAGINARY_LITERAL: ((<TOKEN_FLOATING_POINT_LITERAL>)|(["0"-"9"])*)"i">
+
+| <TOKEN_RUNE_LITERAL: "'" ( (<UNICODE_VALUE>) | (<BYTE_VALUE>) ) "'">
+    | <#UNICODE_VALUE: ( ~["\n"]) | (<LITTLE_U_VALUE>) | (<BIG_U_VALUE>) | (<ESCAPED_CHAR>)>
+    | <#BYTE_VALUE: (<OCTAL_BYTE_VALUE>) | (<HEX_BYTE_VALUE>)>
+    | <#OCTAL_BYTE_VALUE: "\\" (["0"-"7"]) (["0"-"7"]) (["0"-"7"])>
+    | <#HEX_BYTE_VALUE: "\\x" (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])>
+    | <#LITTLE_U_VALUE: "\\u" (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])
+                              (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])>
+    | <#BIG_U_VALUE:  "\\U" (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])
+                            (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])
+                            (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])
+                            (["0"-"9", "a"-"f", "A"-"F"]) (["0"-"9", "a"-"f", "A"-"F"])>
+    | <#ESCAPED_CHAR: "\\" ( "a" | "b" | "f" | "n" | "r" | "t" | "v" | "\\" | "'" | "\"" )>
+
+| <TOKEN_STRING_LITERAL: (<RAW_STRING_LITERAL>) | (<INTERPRETED_STRING_LITERAL>)>
+    | <#RAW_STRING_LITERAL: "`" (~[])* "`">
+    | <#INTERPRETED_STRING_LITERAL: "\"" ((<UNICODE_VALUE>) | (<BYTE_VALUE>))* "\"">
+
 | <TOKEN_IDENTIFIER: ["a"-"z", "A"-"Z", "_"](["a"-"z", "A"-"Z", "_", "0"-"9"])*>
 }
 
@@ -144,11 +164,29 @@ void FloatLiteral() : { Token t; }
   t = <TOKEN_FLOATING_POINT_LITERAL> { jjtThis.value = t.image; }
 }
 
+void ImaginaryLiteral() : { Token t; }
+{
+  t = <TOKEN_IMAGINARY_LITERAL> { jjtThis.value = t.image; }
+}
+
+void RuneLiteral() : { Token t; }
+{
+  t = <TOKEN_RUNE_LITERAL> { jjtThis.value = t.image; }
+}
+
+void StringLiteral() : { Token t; }
+{
+  t = <TOKEN_STRING_LITERAL> { jjtThis.value = t.image; }
+}
+
 void Literal() #void : {}
 {
   LOOKAHEAD(2)
   IntegerLiteral()
-  | FloatLiteral()
+| FloatLiteral()
+| ImaginaryLiteral()
+| RuneLiteral()
+| StringLiteral()
 }
 
 
