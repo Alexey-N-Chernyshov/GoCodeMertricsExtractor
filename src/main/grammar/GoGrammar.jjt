@@ -192,28 +192,82 @@ void Literal() #void : {}
 
 SimpleNode Program() : {}
 {
-  Expression() <EOF> { return jjtThis; }
+  Mult() <EOF> { return jjtThis; }
 }
 
-void Expression() #void : { Token t; }
+void Operand() #void : {}
 {
-  Term()
-  (
-    t = <TOKEN_PLUS> Term() { jjtThis.value = t.image; } #AddOperator(2)
+  Literal()
+}
+
+void PrimaryExpression() #void : {}
+{
+  Operand()
+}
+
+void UnaryPlus() : { Token t; }
+{
+  t = <TOKEN_PLUS> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryMinus() : { Token t; }
+{
+  t = <TOKEN_MINUS> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryExclamation() : { Token t; }
+{
+  t = <TOKEN_EXCLAMATION> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryXor() : { Token t; }
+{
+  t = <TOKEN_XOR> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryMult() : { Token t; }
+{
+  t = <TOKEN_MULT> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryAnd() : { Token t; }
+{
+  t = <TOKEN_AND> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryLessMinus() : { Token t; }
+{
+  t = <TOKEN_LESSMINUS> { jjtThis.value = t.image; } UnaryExpression() { }
+}
+
+void UnaryExpression() #void : {}
+{
+  PrimaryExpression()
+| UnaryPlus()
+| UnaryMinus()
+| UnaryExclamation()
+| UnaryXor()
+| UnaryMult()
+| UnaryAnd()
+| UnaryLessMinus()
+}
+
+void Term() #void : {}
+{
+  UnaryExpression()
+| <TOKEN_LPAREN> PrimaryExpression() <TOKEN_RPAREN>
+}
+
+void Mult() #void : { Token t; }
+{
+  Term() (
+    LOOKAHEAD(2)
+    (t = <TOKEN_MULT> Term() { jjtThis.value = t.image; }           #Mult(2) )
+  | (t = <TOKEN_DIV> Term() { jjtThis.value = t.image; }            #Div(2)  )
+  | (t = <TOKEN_PERCENT> Term() { jjtThis.value = t.image; }        #DivInt(2) )
+  | (t = <TOKEN_LESSLESS> Term() { jjtThis.value = t.image; }       #ShiftLeft(2) )
+  | (t = <TOKEN_GREATERGREATER> Term() { jjtThis.value = t.image; } #ShiftRight(2) )
+  | (t = <TOKEN_AND> Term() { jjtThis.value = t.image; } #And(2) )
+  | (t = <TOKEN_ANDXOR> Term() { jjtThis.value = t.image; } #AndXor(2) )
   )*
-}
-
-void Term() #void : { Token t; }
-{
-  Factor()
-  (
-    t = <TOKEN_MULT> Factor() { jjtThis.value = t.image; } #MultOperator(2)
-  )*
-}
-
-void Factor() #void : {}
-{
-  (<TOKEN_LPAREN> Expression() #Exp(1) <TOKEN_RPAREN>
-  | Literal()
-  )
 }

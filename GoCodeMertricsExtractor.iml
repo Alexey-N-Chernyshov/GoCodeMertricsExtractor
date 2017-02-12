@@ -14,6 +14,17 @@
       <sourceFolder url="file://$MODULE_DIR$/src/test/resources" type="java-test-resource" />
       <excludeFolder url="file://$MODULE_DIR$/target/classes" />
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486882861768" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486898441298" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486900795265" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486900816986" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486900890418" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486900937256" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486900951022" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486902731241" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486903356397" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486905452886" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486905477583" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486905558173" />
       <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
     </content>
     <orderEntry type="inheritedJdk" />
