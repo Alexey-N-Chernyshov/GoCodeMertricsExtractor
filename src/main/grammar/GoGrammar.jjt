@@ -205,51 +205,16 @@ void PrimaryExpression() #void : {}
   Operand()
 }
 
-void UnaryPlus() : { Token t; }
-{
-  t = <TOKEN_PLUS> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryMinus() : { Token t; }
-{
-  t = <TOKEN_MINUS> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryExclamation() : { Token t; }
-{
-  t = <TOKEN_EXCLAMATION> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryXor() : { Token t; }
-{
-  t = <TOKEN_XOR> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryMult() : { Token t; }
-{
-  t = <TOKEN_MULT> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryAnd() : { Token t; }
-{
-  t = <TOKEN_AND> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryLessMinus() : { Token t; }
-{
-  t = <TOKEN_LESSMINUS> { jjtThis.value = t.image; } UnaryExpression() { }
-}
-
-void UnaryExpression() #void : {}
+void UnaryExpression() #void : { Token t; }
 {
   PrimaryExpression()
-| UnaryPlus()
-| UnaryMinus()
-| UnaryExclamation()
-| UnaryXor()
-| UnaryMult()
-| UnaryAnd()
-| UnaryLessMinus()
+| t = <TOKEN_PLUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryPlus(1)
+| t = <TOKEN_MINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryMinus(1)
+| t = <TOKEN_EXCLAMATION> UnaryExpression() { jjtThis.value = t.image; } #UnaryNot(1)
+| t = <TOKEN_XOR> UnaryExpression() { jjtThis.value = t.image; } #UnaryXor(1)
+| t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; } #UnaryMult(1)
+| t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; } #UnaryAnd(1)
+| t = <TOKEN_LESSMINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryLessMinus(1)
 }
 
 void Term() #void : {}
