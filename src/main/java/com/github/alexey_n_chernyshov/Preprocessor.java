@@ -25,7 +25,7 @@ public class Preprocessor {
                         String lastWord = wordList[wordList.length - 1];
                         if (lastWord.matches("[a-z_A-Z]\\w*") ||
 
-                                lastWord.matches("\\d+i?") ||
+                                lastWord.matches("-?\\d+i?") ||
 
                                 lastWord.matches("(0x|0X)([0-9a-fA-F])+") ||
 
@@ -45,6 +45,8 @@ public class Preprocessor {
                     }
                 }
         );
+
+        System.out.println(sb.toString());
         return new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
     }
 }

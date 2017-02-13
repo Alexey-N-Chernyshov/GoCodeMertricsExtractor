@@ -123,7 +123,7 @@ TOKEN:
 | <TOKEN_ANDXOREQUAL: "&^=">
 
 /* Literals */
-| <TOKEN_DECIMAL_INTEGER_LITERAL: ["1"-"9"](["0"-"9"])*>
+| <TOKEN_DECIMAL_INTEGER_LITERAL: ("0")|(["1"-"9"](["0"-"9"])*)>
 
 | <TOKEN_OCTAL_INTEGER_LITERAL: "0"(["0"-"7"])+>
 
@@ -238,7 +238,7 @@ void ParameterDecl() #void : {}
 
 void IdentifierList() #void : {}
 {
-  Identifier() ("," Identifier() )*
+  Identifier() (<TOKEN_COMMA> Identifier() )*
 }
 
 void FunctionBody() : {}
@@ -378,7 +378,18 @@ void Reciever() : {}
 // TODO
 void Declaration() : {}
 {
-  VarDecl()
+  ConstDecl()
+|  VarDecl()
+}
+
+void ConstDecl() : {}
+{
+  <TOKEN_CONST> ( ConstSpec() | <TOKEN_LPAREN> (ConstSpec() <TOKEN_SEMICOLON>)* <TOKEN_RPAREN>)
+}
+
+void ConstSpec() : {}
+{
+  IdentifierList() ( (Type())? <TOKEN_EQUAL> ExpressionList() )?
 }
 
 void VarDecl() : {}
@@ -436,6 +447,7 @@ void MethodExpression() : {}
   ReceiverType() <TOKEN_DOT> MethodName()
 }
 
+//TODO
 void Operand() : {}
 {
   LOOKAHEAD(3)

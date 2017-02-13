@@ -508,4 +508,17 @@ class PrintVisitor implements GoParserVisitor {
         visitAllChildren(node, data);
         return data;
     }
+
+    @Override
+    public Object visit(ASTConstDecl node, Object data) {
+        out.print("const ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTConstSpec node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
 }
