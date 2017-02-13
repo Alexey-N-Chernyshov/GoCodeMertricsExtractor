@@ -14,6 +14,11 @@ PARSER_BEGIN(GoParser)
 
 package com.github.alexey_n_chernyshov;
 
+/**
+ * Parses go lang source and produces AST.
+ * Go lang source should be preprocessed before parsing to be ensure that
+ * all necessary semicolons (;) are inserted.
+ */
 public class GoParser
 {
 }
@@ -316,15 +321,15 @@ void ShortVarDeclaration() : {}
 
 SimpleNode SourceFile() : {}
 {
-  PackageClause()
-  ( ImportDecl() )*
-  ( TopLevelDecl() )*
+  PackageClause() <TOKEN_SEMICOLON>
+  ( ImportDecl() <TOKEN_SEMICOLON> )*
+  ( TopLevelDecl() <TOKEN_SEMICOLON> )*
   <EOF> { return jjtThis; }
 }
 
 void PackageClause() : {}
 {
-  <TOKEN_PACKAGE> Identifier() <TOKEN_SEMICOLON>
+  <TOKEN_PACKAGE> Identifier()
 }
 
 void ImportDecl() : {}
