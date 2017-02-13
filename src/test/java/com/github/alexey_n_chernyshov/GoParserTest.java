@@ -54,7 +54,7 @@ public class GoParserTest {
         String src = "1234567890";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -69,7 +69,7 @@ public class GoParserTest {
     public void testDecimalIntegerLiterals1() throws ParseException {
         String src = "01234567890";
         GoParser parser = createParser(src);
-        parser.Program();
+        parser.SourceFile();
     }
 
     /**
@@ -80,7 +80,7 @@ public class GoParserTest {
         String src = "0xABC1234567890";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -95,7 +95,7 @@ public class GoParserTest {
         String src = "0XABC1234567890";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -110,7 +110,7 @@ public class GoParserTest {
         String src = "0.";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -125,7 +125,7 @@ public class GoParserTest {
         String src = "072.40";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -140,7 +140,7 @@ public class GoParserTest {
         String src = ".12345E+5";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -155,7 +155,7 @@ public class GoParserTest {
         String src = "0i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -170,7 +170,7 @@ public class GoParserTest {
         String src = "0.i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -185,7 +185,7 @@ public class GoParserTest {
         String src = "1.e+0i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -200,7 +200,7 @@ public class GoParserTest {
         String src = "6.67428e-11i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -215,7 +215,7 @@ public class GoParserTest {
         String src = "1E6i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -230,7 +230,7 @@ public class GoParserTest {
         String src = ".25i";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -245,7 +245,7 @@ public class GoParserTest {
         String src = "'a'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -260,7 +260,7 @@ public class GoParserTest {
         String src = "'ä'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -275,7 +275,7 @@ public class GoParserTest {
         String src = "'\\t'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -290,7 +290,7 @@ public class GoParserTest {
         String src = "'\\007'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -305,7 +305,7 @@ public class GoParserTest {
         String src = "'\\xff'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -320,7 +320,7 @@ public class GoParserTest {
         String src = "'\\u12e4'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -335,7 +335,7 @@ public class GoParserTest {
         String src = "'\\U00101234'";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -351,7 +351,7 @@ public class GoParserTest {
         String src = "'\\''";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -366,7 +366,7 @@ public class GoParserTest {
     public void testRuneLiterals9() throws ParseException {
         String src = "'aa'";
         GoParser parser = createParser(src);
-        parser.Program();
+        parser.SourceFile();
     }
 
     /**
@@ -377,7 +377,7 @@ public class GoParserTest {
     public void testRuneLiterals10() throws ParseException {
         String src = "'\\xa'";
         GoParser parser = createParser(src);
-        parser.Program();
+        parser.SourceFile();
     }
 
     /**
@@ -388,7 +388,7 @@ public class GoParserTest {
         String src = "`abc`";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -405,7 +405,7 @@ public class GoParserTest {
                         "\\n`";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -420,7 +420,7 @@ public class GoParserTest {
         String src = "\"Hello, world!\\n\"";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());
@@ -435,7 +435,7 @@ public class GoParserTest {
         String src = "\"\\u65e5\\U00008a9e\"";
         GoParser parser = createParser(src);
         try {
-            SimpleNode root = parser.Program();
+            SimpleNode root = parser.SourceFile();
             assertEquals(getParseResult(root), src);
         } catch (ParseException e) {
             fail("Caught an exception " + e.toString());

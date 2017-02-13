@@ -16,7 +16,7 @@ public class MainApp {
         }
 
         GoParser parser = new GoParser(new FileInputStream(args[0]));
-        SimpleNode root = parser.Program();
+        SimpleNode root = parser.SourceFile();
 
         System.out.println("Abstract Syntax Tree:");
         root.dump(" ");

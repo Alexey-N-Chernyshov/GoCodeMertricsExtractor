@@ -244,8 +244,8 @@ void FunctionBody() : {}
 void TypeName() #void : {}
 {
   LOOKAHEAD(2)
-  Identifier()
-| QualifiedIdentifier()
+  QualifiedIdentifier()
+| Identifier()
 }
 
 //TODO
@@ -285,12 +285,69 @@ void Type() : {}
 
 void Block() : {}
 {
-  <TOKEN_LCURLYBRACE> <TOKEN_RCURLYBRACE>
+  <TOKEN_LCURLYBRACE> StatementList() <TOKEN_RCURLYBRACE>
 }
 
-SimpleNode Program() : {}
+void StatementList() : {}
 {
-  Expression() <EOF> { return jjtThis; }
+  Statement() (<TOKEN_SEMICOLON>)?
+}
+
+//TODO
+void Statement() : {}
+{
+  SimpleStatement()
+| Block()
+}
+
+//TODO
+void SimpleStatement() : {}
+{
+  Expression()
+}
+
+SimpleNode SourceFile() : {}
+{
+  PackageClause()
+  ( ImportDecl() )*
+  ( TopLevelDecl() )*
+  <EOF> { return jjtThis; }
+}
+
+void PackageClause() : {}
+{
+  <TOKEN_PACKAGE> Identifier() (<TOKEN_SEMICOLON>)?
+}
+
+void ImportDecl() : {}
+{
+  <TOKEN_IMPORT> ( ImportSpec() | <TOKEN_LPAREN> ( ImportSpec() (<TOKEN_SEMICOLON>)? )* <TOKEN_RPAREN> )
+}
+
+void ImportSpec() #void : {}
+{
+  ( <TOKEN_DOT> | PackageName() )? ImportPath()
+}
+
+void ImportPath() : {}
+{
+  StringLiteral()
+}
+
+//TODO
+void TopLevelDecl() : {}
+{
+  FunctionDecl()
+}
+
+void FunctionDecl() : {}
+{
+  <TOKEN_FUNC> FunctionName() (LOOKAHEAD(3) Function() | Signature())
+}
+
+void FunctionName() : {}
+{
+  Identifier()
 }
 
 void Identifier() : { Token t; }
@@ -315,34 +372,57 @@ void OperandName() #void : {}
 | Identifier()
 }
 
-//void ReceiverType() : {}
-//{
-//  TypeName()
-//  | <TOKEN_LPAREN> ReceiverType() <TOKEN_RPAREN>
-////  | <TOKEN_LPAREN> <TOKEN_MULT> TypeName() <TOKEN_RPAREN>
-//}
-//
-//void MethodName() : {}
-//{
-//  Identifier()
-//}
-//
-//void MethodExpression() : {}
-//{
-//  ReceiverType() <TOKEN_DOT> MethodName()
-//}
-
-void Operand() #void : {}
+//TODO
+void ReceiverType() : {}
 {
-  Literal()
-| OperandName()
-//| MethodExpression()
-| <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
+  TypeName()
+//  | <TOKEN_LPAREN> ReceiverType() <TOKEN_RPAREN>
+//  | <TOKEN_LPAREN> <TOKEN_MULT> TypeName() <TOKEN_RPAREN>
 }
 
-void PrimaryExpression() #void : {}
+void MethodExpression() : {}
 {
-  Operand()
+  ReceiverType() <TOKEN_DOT> MethodName()
+}
+
+void Operand() : {}
+{
+  LOOKAHEAD(3)
+//  MethodExpression()
+ <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
+| OperandName()
+| Literal()
+}
+
+// TODO
+void PrimaryExpression() : {}
+{
+  LOOKAHEAD(3)
+  Operand() PrimaryExpressionLR()
+| Operand()
+}
+
+//to avoid Left Recursion
+void PrimaryExpressionLR() #void : {}
+{
+  LOOKAHEAD(3)
+  Arguments()
+| PrimaryExpression() PrimaryExpressionLR()
+}
+
+void Arguments() : {}
+{
+  <TOKEN_LPAREN>
+  (
+  (LOOKAHEAD(3) ExpressionList() | Type() (LOOKAHEAD(2) <TOKEN_COMMA> ExpressionList())? )
+  (<TOKEN_ELLIPSIS>)? (<TOKEN_COMMA>)?
+  )?
+  <TOKEN_RPAREN>
+}
+
+void ExpressionList() : {}
+{
+  Expression() (LOOKAHEAD(2) <TOKEN_COMMA> Expression() )*
 }
 
 void UnaryExpression() #void : { Token t; }
