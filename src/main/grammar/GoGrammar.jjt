@@ -290,20 +290,28 @@ void Block() : {}
 
 void StatementList() : {}
 {
-  (Statement() (<TOKEN_SEMICOLON>)?)*
+  (Statement() <TOKEN_SEMICOLON> )*
 }
 
 //TODO
 void Statement() : {}
 {
-  SimpleStatement()
+  Declaration()
+| SimpleStatement()
 | Block()
 }
 
 //TODO
 void SimpleStatement() : {}
 {
+  LOOKAHEAD(2)
   Expression()
+| ShortVarDeclaration()
+}
+
+void ShortVarDeclaration() : {}
+{
+  IdentifierList() <TOKEN_COLONEQUAL> ExpressionList()
 }
 
 SimpleNode SourceFile() : {}
@@ -316,12 +324,12 @@ SimpleNode SourceFile() : {}
 
 void PackageClause() : {}
 {
-  <TOKEN_PACKAGE> Identifier() (<TOKEN_SEMICOLON>)?
+  <TOKEN_PACKAGE> Identifier() <TOKEN_SEMICOLON>
 }
 
 void ImportDecl() : {}
 {
-  <TOKEN_IMPORT> ( ImportSpec() | <TOKEN_LPAREN> ( ImportSpec() (<TOKEN_SEMICOLON>)? )* <TOKEN_RPAREN> )
+  <TOKEN_IMPORT> ( ImportSpec() | <TOKEN_LPAREN> ( ImportSpec() <TOKEN_SEMICOLON> )* <TOKEN_RPAREN> )
 }
 
 void ImportSpec() #void : {}
@@ -337,7 +345,24 @@ void ImportPath() : {}
 //TODO
 void TopLevelDecl() : {}
 {
-  FunctionDecl()
+  Declaration()
+| FunctionDecl()
+}
+
+// TODO
+void Declaration() : {}
+{
+  VarDecl()
+}
+
+void VarDecl() : {}
+{
+  <TOKEN_VAR> (VarSpec() | <TOKEN_LPAREN> (VarSpec())* <TOKEN_RPAREN>)
+}
+
+void VarSpec() : {}
+{
+  IdentifierList() (<TOKEN_EQUAL> ExpressionList() | Type() ( <TOKEN_EQUAL> ExpressionList() )?)
 }
 
 void FunctionDecl() : {}
