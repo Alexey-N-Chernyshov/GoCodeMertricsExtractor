@@ -76,7 +76,7 @@ TOKEN:
 /* operators and delimiters */
 | <TOKEN_PLUS: "+">
 | <TOKEN_AND: "&">
-| <TOKEN_PLUSEQUSL: "+=">
+| <TOKEN_PLUSEQUAL: "+=">
 | <TOKEN_ANDEQUAL: "&=">
 | <TOKEN_ANDAND: "&&">
 | <TOKEN_EQUALEQUAL: "==">
@@ -85,7 +85,7 @@ TOKEN:
 | <TOKEN_RPAREN: ")">
 | <TOKEN_MINUS: "-">
 | <TOKEN_OR: "|">
-| <TOKEN_MINUSTOKEN_EQUAL: "-=">
+| <TOKEN_MINUSEQUAL: "-=">
 | <TOKEN_OREQUAL: "|=">
 | <TOKEN_OROR: "||">
 | <TOKEN_LESS: "<">
@@ -232,8 +232,8 @@ void ParameterList() #void : {}
 void ParameterDecl() #void : {}
 {
   LOOKAHEAD(2)
-  Type()
-| IdentifierList() ( <TOKEN_ELLIPSIS> )? Type()
+  IdentifierList() ( <TOKEN_ELLIPSIS> )? Type()
+| Type()
 }
 
 void IdentifierList() #void : {}
@@ -257,11 +257,17 @@ void TypeName() #void : {}
 void TypeLit() #void : {}
 {
   InterfaceType()
+| PointerType()
 }
 
 void InterfaceType() : {}
 {
   <TOKEN_INTERFACE> <TOKEN_LCURLYBRACE> ( MethodSpec() <TOKEN_SEMICOLON> )* <TOKEN_RCURLYBRACE>
+}
+
+void PointerType() : {}
+{
+  <TOKEN_MULT> Type()
 }
 
 void MethodSpec() : {}
@@ -309,9 +315,15 @@ void Statement() : {}
 //TODO
 void SimpleStatement() : {}
 {
-  LOOKAHEAD(2)
-  Expression()
-| ShortVarDeclaration()
+  LOOKAHEAD(3)
+  ShortVarDeclaration()
+//| Assignment()
+| Expression()
+}
+
+void Assignment() : {}
+{
+  ExpressionList() (<TOKEN_PLUSEQUAL> | <TOKEN_MINUSEQUAL> | <TOKEN_EQUAL> ) ExpressionList()
 }
 
 void ShortVarDeclaration() : {}
@@ -347,11 +359,20 @@ void ImportPath() : {}
   StringLiteral()
 }
 
-//TODO
 void TopLevelDecl() : {}
 {
   Declaration()
-| FunctionDecl()
+| <TOKEN_FUNC> (FunctionDecl() | MethodDecl())
+}
+
+void MethodDecl(): {}
+{
+  Reciever() MethodName() (LOOKAHEAD(3) Function() | Signature())
+}
+
+void Reciever() : {}
+{
+  Parameters()
 }
 
 // TODO
@@ -372,7 +393,7 @@ void VarSpec() : {}
 
 void FunctionDecl() : {}
 {
-  <TOKEN_FUNC> FunctionName() (LOOKAHEAD(3) Function() | Signature())
+  FunctionName() (LOOKAHEAD(3) Function() | Signature())
 }
 
 void FunctionName() : {}

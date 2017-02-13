@@ -268,6 +268,7 @@ class PrintVisitor implements GoParserVisitor {
     @Override
     public Object visit(ASTIdentifier node, Object data) {
         out.print(node.value);
+        visitAllChildren(node, data);
         return data;
     }
 
@@ -280,7 +281,7 @@ class PrintVisitor implements GoParserVisitor {
 
     @Override
     public Object visit(ASTResult node, Object data) {
-        out.print(node.value);
+        visitAllChildren(node, data);
         return data;
     }
 
@@ -298,7 +299,7 @@ class PrintVisitor implements GoParserVisitor {
 
     @Override
     public Object visit(ASTType node, Object data) {
-        out.print(node.value);
+        visitAllChildren(node, data);
         return data;
     }
 
@@ -318,13 +319,18 @@ class PrintVisitor implements GoParserVisitor {
 
     @Override
     public Object visit(ASTMethodName node, Object data) {
-        out.print(node.value);
+        node.jjtGetChild(0).jjtAccept(this, data);
+        out.print("(");
+        for (int i = 1; i < node.jjtGetNumChildren(); i++) {
+            node.jjtGetChild(i).jjtAccept(this, data);
+        }
+        out.print(") ");
         return data;
     }
 
     @Override
     public Object visit(ASTInterfaceType node, Object data) {
-        out.print(node.value);
+        visitAllChildren(node, data);
         return data;
     }
 
@@ -466,6 +472,39 @@ class PrintVisitor implements GoParserVisitor {
 
     @Override
     public Object visit(ASTDeclaration node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTAssignment node, Object data) {
+        node.jjtGetChild(0).jjtAccept(this, data);
+        out.print(" = ");
+        node.jjtGetChild(0).jjtAccept(this, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTMethodDecl node, Object data) {
+        out.print("func (");
+        node.jjtGetChild(0).jjtAccept(this, data);
+        out.print(") ");
+        node.jjtGetChild(1).jjtAccept(this, data);
+        for (int i = 2; i < node.jjtGetNumChildren(); i++) {
+            node.jjtGetChild(i).jjtAccept(this, data);
+        }
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTReciever node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTPointerType node, Object data) {
+        out.print("*");
         visitAllChildren(node, data);
         return data;
     }
