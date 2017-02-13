@@ -290,7 +290,7 @@ void Block() : {}
 
 void StatementList() : {}
 {
-  Statement() (<TOKEN_SEMICOLON>)?
+  (Statement() (<TOKEN_SEMICOLON>)?)*
 }
 
 //TODO
@@ -440,7 +440,7 @@ void UnaryExpression() #void : { Token t; }
 void MultOperators() #void : { Token t; }
 {
   UnaryExpression() (
-    LOOKAHEAD(2)
+    LOOKAHEAD(2) (
     (t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; }           #Mult(2) )
   | (t = <TOKEN_DIV> UnaryExpression() { jjtThis.value = t.image; }            #Div(2)  )
   | (t = <TOKEN_PERCENT> UnaryExpression() { jjtThis.value = t.image; }        #DivInt(2) )
@@ -448,16 +448,19 @@ void MultOperators() #void : { Token t; }
   | (t = <TOKEN_GREATERGREATER> UnaryExpression() { jjtThis.value = t.image; } #ShiftRight(2) )
   | (t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; }            #And(2) )
   | (t = <TOKEN_ANDXOR> UnaryExpression() { jjtThis.value = t.image; }         #AndXor(2) )
+    )
   )*
 }
 
 void AddOperators() #void : { Token t; }
 {
   MultOperators() (
+    LOOKAHEAD(2) (
     (t = <TOKEN_PLUS> MultOperators() { jjtThis.value = t.image; }  #Add(2) )
   | (t = <TOKEN_MINUS> MultOperators() { jjtThis.value = t.image; } #Sub(2) )
   | (t = <TOKEN_OR> MultOperators() { jjtThis.value = t.image; }    #Or(2)  )
   | (t = <TOKEN_XOR> MultOperators() { jjtThis.value = t.image; }   #Xor(2) )
+    )
   )*
 }
 
