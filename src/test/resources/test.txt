@@ -21,3 +21,7 @@ type Block interface {
 	Encrypt(src, dst []byte)
 	Decrypt(src, dst []byte)
 }
+
+func main() {
+    m["foo"];
+}

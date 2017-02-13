@@ -557,4 +557,10 @@ class PrintVisitor implements GoParserVisitor {
         visitAllChildren(node, data);
         return data;
     }
+
+    @Override
+    public Object visit(ASTIndex node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
 }

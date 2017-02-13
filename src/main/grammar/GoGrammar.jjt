@@ -399,7 +399,6 @@ void Reciever() : {}
   Parameters()
 }
 
-// TODO
 void Declaration() : {}
 {
   ConstDecl()
@@ -498,14 +497,25 @@ void PrimaryExpression() : {}
   LOOKAHEAD(3)
   Operand() PrimaryExpressionLR()
 | Operand()
+// | Conversion()
 }
 
 //to avoid Left Recursion
 void PrimaryExpressionLR() #void : {}
 {
-  LOOKAHEAD(3)
+  (LOOKAHEAD(3)
+//Selector()
+//Slice()
+//TypeAssertion()
   Arguments()
 | PrimaryExpression() PrimaryExpressionLR()
+| Index()
+  )
+}
+
+void Index() : {}
+{
+  <TOKEN_LSQUAREPAREN> Expression() <TOKEN_RSQUAREPAREN>
 }
 
 void Arguments() : {}
