@@ -256,8 +256,32 @@ void TypeName() #void : {}
 //TODO
 void TypeLit() #void : {}
 {
-  InterfaceType()
+  LOOKAHEAD(2)
+  ArrayType()
+| StructType()
+| InterfaceType()
 | PointerType()
+| SliceType()
+}
+
+void ArrayType() : {}
+{
+  <TOKEN_LSQUAREPAREN> Expression() <TOKEN_RSQUAREPAREN> Type()
+}
+
+void StructType() : {}
+{
+  <TOKEN_STRUCT> <TOKEN_LCURLYBRACE> (FieldDecl() <TOKEN_SEMICOLON>)* <TOKEN_RCURLYBRACE>
+}
+
+void SliceType() : {}
+{
+  <TOKEN_LSQUAREPAREN> <TOKEN_RSQUAREPAREN> Type()
+}
+
+void FieldDecl() : {}
+{
+   (LOOKAHEAD(2) IdentifierList() Type() | (<TOKEN_MULT>)? TypeName()) (StringLiteral())?
 }
 
 void InterfaceType() : {}
@@ -379,12 +403,23 @@ void Reciever() : {}
 void Declaration() : {}
 {
   ConstDecl()
+|  TypeDecl()
 |  VarDecl()
 }
 
 void ConstDecl() : {}
 {
   <TOKEN_CONST> ( ConstSpec() | <TOKEN_LPAREN> (ConstSpec() <TOKEN_SEMICOLON>)* <TOKEN_RPAREN>)
+}
+
+void TypeDecl() : {}
+{
+  <TOKEN_TYPE> (TypeSpec() | <TOKEN_LPAREN> (TypeSpec() <TOKEN_SEMICOLON> )* <TOKEN_RPAREN> )
+}
+
+void TypeSpec() : {}
+{
+  Identifier() Type()
 }
 
 void ConstSpec() : {}
