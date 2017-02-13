@@ -29,13 +29,13 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>javacc-maven-plugin</artifactId>
+                <version>2.6</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
                         <configuration>
                             <sourceDirectory>${basedir}/src/main/grammar</sourceDirectory>
                             <outputDirectory>${basedir}/target/generated-sources/javacc</outputDirectory>
-                            <packageName>org.apache.activemq.selector</packageName>
                         </configuration>
                         <goals>
                             <goal>jjtree-javacc</goal>
