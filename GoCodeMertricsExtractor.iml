@@ -27,6 +27,7 @@
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486905558173" />
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486911288124" />
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486911319446" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486924246922" />
       <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
     </content>
     <orderEntry type="inheritedJdk" />

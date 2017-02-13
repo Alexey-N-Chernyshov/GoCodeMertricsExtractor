@@ -182,22 +182,162 @@ void StringLiteral() : { Token t; }
 void Literal() #void : {}
 {
   LOOKAHEAD(2)
+  /* Base literals */
   IntegerLiteral()
 | FloatLiteral()
 | ImaginaryLiteral()
 | RuneLiteral()
 | StringLiteral()
+
+| FunctionLit()
 }
 
+void FunctionLit() : {}
+{
+    <TOKEN_FUNC> Function()
+}
+
+void Function() #void : {}
+{
+  Signature() FunctionBody()
+}
+
+void Signature() #void : {}
+{
+  Parameters() ( Result() )?
+}
+
+void Result() : {}
+{
+  LOOKAHEAD(3)
+  Parameters()
+| Type()
+}
+
+void Parameters() : {}
+{
+  <TOKEN_LPAREN> (ParameterList() (<TOKEN_COMMA>)? )? <TOKEN_RPAREN>
+}
+
+void ParameterList() #void : {}
+{
+  ParameterDecl() (LOOKAHEAD(2) <TOKEN_COMMA> ParameterDecl() )*
+}
+
+void ParameterDecl() #void : {}
+{
+  LOOKAHEAD(2)
+  Type()
+| IdentifierList() ( <TOKEN_ELLIPSIS> )? Type()
+}
+
+void IdentifierList() #void : {}
+{
+  Identifier() ("," Identifier() )*
+}
+
+void FunctionBody() : {}
+{
+  Block()
+}
+
+void TypeName() #void : {}
+{
+  LOOKAHEAD(2)
+  Identifier()
+| QualifiedIdentifier()
+}
+
+//TODO
+void TypeLit() #void : {}
+{
+  InterfaceType()
+}
+
+void InterfaceType() : {}
+{
+  <TOKEN_INTERFACE> <TOKEN_LCURLYBRACE> ( MethodSpec() <TOKEN_SEMICOLON> )* <TOKEN_RCURLYBRACE>
+}
+
+void MethodSpec() : {}
+{
+  LOOKAHEAD(2)
+  MethodName() Signature()
+| InterfaceTypeName()
+}
+
+void MethodName() : {}
+{
+  Identifier()
+}
+
+void InterfaceTypeName() : {}
+{
+  TypeName()
+}
+
+void Type() : {}
+{
+  TypeName()
+| TypeLit()
+| <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
+}
+
+void Block() : {}
+{
+  <TOKEN_LCURLYBRACE> <TOKEN_RCURLYBRACE>
+}
 
 SimpleNode Program() : {}
 {
-  OrOrOperator() <EOF> { return jjtThis; }
+  Expression() <EOF> { return jjtThis; }
 }
+
+void Identifier() : { Token t; }
+{
+  t = <TOKEN_IDENTIFIER> { jjtThis.value = t.image; }
+}
+
+void PackageName() : { Token t; }
+{
+  t = <TOKEN_IDENTIFIER> { jjtThis.value = t.image; }
+}
+
+void QualifiedIdentifier() #void : {}
+{
+  PackageName() <TOKEN_DOT> Identifier()
+}
+
+void OperandName() #void : {}
+{
+  LOOKAHEAD(2)
+  QualifiedIdentifier()
+| Identifier()
+}
+
+//void ReceiverType() : {}
+//{
+//  TypeName()
+//  | <TOKEN_LPAREN> ReceiverType() <TOKEN_RPAREN>
+////  | <TOKEN_LPAREN> <TOKEN_MULT> TypeName() <TOKEN_RPAREN>
+//}
+//
+//void MethodName() : {}
+//{
+//  Identifier()
+//}
+//
+//void MethodExpression() : {}
+//{
+//  ReceiverType() <TOKEN_DOT> MethodName()
+//}
 
 void Operand() #void : {}
 {
   Literal()
+| OperandName()
+//| MethodExpression()
+| <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
 }
 
 void PrimaryExpression() #void : {}
@@ -217,23 +357,17 @@ void UnaryExpression() #void : { Token t; }
 | t = <TOKEN_LESSMINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryLessMinus(1)
 }
 
-void Term() #void : {}
-{
-  UnaryExpression()
-| <TOKEN_LPAREN> PrimaryExpression() <TOKEN_RPAREN>
-}
-
 void MultOperators() #void : { Token t; }
 {
-  Term() (
+  UnaryExpression() (
     LOOKAHEAD(2)
-    (t = <TOKEN_MULT> Term() { jjtThis.value = t.image; }           #Mult(2) )
-  | (t = <TOKEN_DIV> Term() { jjtThis.value = t.image; }            #Div(2)  )
-  | (t = <TOKEN_PERCENT> Term() { jjtThis.value = t.image; }        #DivInt(2) )
-  | (t = <TOKEN_LESSLESS> Term() { jjtThis.value = t.image; }       #ShiftLeft(2) )
-  | (t = <TOKEN_GREATERGREATER> Term() { jjtThis.value = t.image; } #ShiftRight(2) )
-  | (t = <TOKEN_AND> Term() { jjtThis.value = t.image; }            #And(2) )
-  | (t = <TOKEN_ANDXOR> Term() { jjtThis.value = t.image; }         #AndXor(2) )
+    (t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; }           #Mult(2) )
+  | (t = <TOKEN_DIV> UnaryExpression() { jjtThis.value = t.image; }            #Div(2)  )
+  | (t = <TOKEN_PERCENT> UnaryExpression() { jjtThis.value = t.image; }        #DivInt(2) )
+  | (t = <TOKEN_LESSLESS> UnaryExpression() { jjtThis.value = t.image; }       #ShiftLeft(2) )
+  | (t = <TOKEN_GREATERGREATER> UnaryExpression() { jjtThis.value = t.image; } #ShiftRight(2) )
+  | (t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; }            #And(2) )
+  | (t = <TOKEN_ANDXOR> UnaryExpression() { jjtThis.value = t.image; }         #AndXor(2) )
   )*
 }
 
@@ -271,4 +405,9 @@ void OrOrOperator() #void : { Token t; }
   AndAndOperator() (
     (t = <TOKEN_OROR> AndAndOperator() { jjtThis.value = t.image; } #OrOr(2) )
   )*
+}
+
+void Expression() #void : {}
+{
+  OrOrOperator()
 }
