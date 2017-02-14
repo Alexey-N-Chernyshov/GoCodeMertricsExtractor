@@ -470,15 +470,33 @@ void Label() : {}
 //TODO
 void SimpleStatement() : {}
 {
-  LOOKAHEAD(3)
 //EmptyStmt
 //| SendStmt
-//| IncDecStmt
+ (LOOKAHEAD(100)
+ IncDecStmt()
 //| Assignment
 //| ShortVarDecl
+| (LOOKAHEAD(100)
   ShortVarDeclaration()
 //| Assignment()
 | Expression()
+  )
+  )
+}
+
+void IncDecStmt() #void : {}
+{
+  Expression() (IncStmt() | DecStmt())
+}
+
+void IncStmt() : {}
+{
+  <TOKEN_PLUSPLUS>
+}
+
+void DecStmt() : {}
+{
+  <TOKEN_MINNUSMINUS>
 }
 
 void Assignment() : {}

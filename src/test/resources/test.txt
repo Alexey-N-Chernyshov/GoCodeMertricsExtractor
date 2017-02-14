@@ -2,8 +2,7 @@ package main;
 
 func main() {
 
-for i = range testdata {
-	f;
-}
+x++;
+x--;
 
 }
