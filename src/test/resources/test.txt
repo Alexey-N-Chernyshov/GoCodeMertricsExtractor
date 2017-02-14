@@ -1,5 +1,20 @@
 package main;
 
 func main() {
-  op.op ;
+  go op.op ;
+  Error: op.op ;
+  break;
+  break error;
+  return 1;
+  return ;
+
+  goto;
+  goto error;
+
+  continue;
+  continue error;
+
+  fallthrough;
+
+  defer 2 + 2;
 }

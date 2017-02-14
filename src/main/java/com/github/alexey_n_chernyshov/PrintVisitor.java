@@ -584,4 +584,69 @@ class PrintVisitor implements GoParserVisitor {
         visitAllChildren(node, data);
         return data;
     }
+
+    @Override
+    public Object visit(ASTLabeledStmt node, Object data) {
+        node.jjtGetChild(0).jjtAccept(this, data);
+        out.print(": ");
+        for (int i = 1; i < node.jjtGetNumChildren(); i++) {
+            node.jjtGetChild(i).jjtAccept(this, data);
+        }
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTLabel node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTGoStmt node, Object data) {
+        out.print("go ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTReturnStmt node, Object data) {
+        out.print("return ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTBreakStmt node, Object data) {
+        out.print("break ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTContinueStmt node, Object data) {
+        out.print("continue ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTGotoStmt node, Object data) {
+        out.print("goto ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTFallthroughStmt node, Object data) {
+        out.print("fallthrough ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTDeferStmt node, Object data) {
+        out.print("defer ");
+        visitAllChildren(node, data);
+        return data;
+    }
 }

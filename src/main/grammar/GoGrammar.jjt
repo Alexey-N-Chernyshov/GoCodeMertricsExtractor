@@ -339,21 +339,68 @@ void StatementList() : {}
 //TODO
 void Statement() : {}
 {
-  Declaration()
- //| LabeledStmt |
+  (LOOKAHEAD(2)
+  LabeledStmt()
+| Declaration()
 | SimpleStatement()
-//	GoStmt
-//| ReturnStmt
-//| BreakStmt
-//| ContinueStmt
-//| GotoStmt
-//	FallthroughStmt |
+| GoStmt()
+| ReturnStmt()
+| BreakStmt()
+| ContinueStmt()
+| GotoStmt()
+| FallthroughStmt()
 | Block()
 //| IfStmt
 // |  SwitchStmt
 //| SelectStmt
 //| ForStmt |
-//	DeferStmt
+| DeferStmt()
+  )
+}
+
+void LabeledStmt() : {}
+{
+  Label() <TOKEN_COLON> Statement()
+}
+
+void GoStmt() : {}
+{
+  <TOKEN_GO> Expression()
+}
+
+void ReturnStmt() : {}
+{
+  <TOKEN_RETURN> (ExpressionList())?
+}
+
+void BreakStmt() : {}
+{
+  <TOKEN_BREAK> (Label())?
+}
+
+void ContinueStmt() : {}
+{
+  <TOKEN_CONTINUE> (Label())?
+}
+
+void GotoStmt() : {}
+{
+  <TOKEN_GOTO> (Label())?
+}
+
+void FallthroughStmt() : {}
+{
+  <TOKEN_FALLTROUGH>
+}
+
+void DeferStmt() : {}
+{
+  <TOKEN_DEFER> Expression()
+}
+
+void Label() : {}
+{
+  Identifier()
 }
 
 //TODO
