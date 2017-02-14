@@ -353,7 +353,7 @@ void Statement() : {}
 | IfStmt()
 | SwitchStmt()
 //| SelectStmt
-//| ForStmt |
+| ForStmt()
 | DeferStmt()
   )
 }
@@ -433,6 +433,33 @@ void ExprSwitchStmt() : {}
 void ExprCaseClause() : {}
 {
   (<TOKEN_CASE> ExpressionList() | <TOKEN_DEFAULT>) <TOKEN_COLON> StatementList()
+}
+
+void ForStmt() : {}
+{
+  <TOKEN_FOR>
+  ( LOOKAHEAD(100)
+  RangeClause() |
+  (LOOKAHEAD(100)
+  ForClause()
+  | Condition()
+  )
+  )? Block()
+}
+
+void Condition() : {}
+{
+  Expression()
+}
+
+void ForClause() : {}
+{
+  ( SimpleStatement() )? <TOKEN_SEMICOLON> ( Condition() )? <TOKEN_SEMICOLON> ( SimpleStatement() )?
+}
+
+void RangeClause() : {}
+{
+  (LOOKAHEAD(100) IdentifierList() <TOKEN_COLONEQUAL> | ExpressionList() <TOKEN_EQUAL> ) <TOKEN_RANGE> Expression()
 }
 
 void Label() : {}

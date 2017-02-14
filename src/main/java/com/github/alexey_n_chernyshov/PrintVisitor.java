@@ -691,4 +691,29 @@ class PrintVisitor implements GoParserVisitor {
         visitAllChildren(node, data);
         return data;
     }
+
+    @Override
+    public Object visit(ASTForStmt node, Object data) {
+        out.print("for ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTCondition node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTForClause node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTRangeClause node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
 }
