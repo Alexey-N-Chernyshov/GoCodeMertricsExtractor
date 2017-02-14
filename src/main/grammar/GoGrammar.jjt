@@ -209,7 +209,7 @@ void Function() #void : {}
 
 void Signature() #void : {}
 {
-  Parameters() ( Result() )?
+  Parameters() (LOOKAHEAD(2) Result() )?
 }
 
 void Result() : {}
@@ -231,14 +231,14 @@ void ParameterList() #void : {}
 
 void ParameterDecl() #void : {}
 {
-  LOOKAHEAD(2)
-  IdentifierList() ( <TOKEN_ELLIPSIS> )? Type()
+  LOOKAHEAD(100)
+  (LOOKAHEAD(2) IdentifierList())? ( <TOKEN_ELLIPSIS> )? Type()
 | Type()
 }
 
-void IdentifierList() #void : {}
+void IdentifierList() : {}
 {
-  Identifier() (<TOKEN_COMMA> Identifier() )*
+  Identifier() ( <TOKEN_COMMA> Identifier() )*
 }
 
 void FunctionBody() : {}
@@ -259,9 +259,12 @@ void TypeLit() #void : {}
   LOOKAHEAD(2)
   ArrayType()
 | StructType()
-| InterfaceType()
 | PointerType()
+| FunctionType()
+| InterfaceType()
 | SliceType()
+//MapType
+// Channeltype
 }
 
 void ArrayType() : {}
@@ -272,6 +275,11 @@ void ArrayType() : {}
 void StructType() : {}
 {
   <TOKEN_STRUCT> <TOKEN_LCURLYBRACE> (FieldDecl() <TOKEN_SEMICOLON>)* <TOKEN_RCURLYBRACE>
+}
+
+void FunctionType() : {}
+{
+  <TOKEN_FUNC> Signature()
 }
 
 void SliceType() : {}
@@ -313,9 +321,9 @@ void InterfaceTypeName() : {}
 
 void Type() : {}
 {
-  TypeName()
+  <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
 | TypeLit()
-| <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
+| TypeName()
 }
 
 void Block() : {}
@@ -332,14 +340,31 @@ void StatementList() : {}
 void Statement() : {}
 {
   Declaration()
+ //| LabeledStmt |
 | SimpleStatement()
+//	GoStmt
+//| ReturnStmt
+//| BreakStmt
+//| ContinueStmt
+//| GotoStmt
+//	FallthroughStmt |
 | Block()
+//| IfStmt
+// |  SwitchStmt
+//| SelectStmt
+//| ForStmt |
+//	DeferStmt
 }
 
 //TODO
 void SimpleStatement() : {}
 {
   LOOKAHEAD(3)
+//EmptyStmt
+//| SendStmt
+//| IncDecStmt
+//| Assignment
+//| ShortVarDecl
   ShortVarDeclaration()
 //| Assignment()
 | Expression()
@@ -484,19 +509,20 @@ void MethodExpression() : {}
 //TODO
 void Operand() : {}
 {
-  LOOKAHEAD(3)
+  (LOOKAHEAD(3)
 //  MethodExpression()
  <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
 | OperandName()
 | Literal()
+  )
 }
 
 // TODO
 void PrimaryExpression() : {}
 {
   LOOKAHEAD(3)
-  Operand() PrimaryExpressionLR()
-| Operand()
+  Operand()
+| Operand() PrimaryExpressionLR()
 // | Conversion()
 }
 
@@ -504,13 +530,18 @@ void PrimaryExpression() : {}
 void PrimaryExpressionLR() #void : {}
 {
   (LOOKAHEAD(3)
-//Selector()
 //Slice()
 //TypeAssertion()
   Arguments()
 | PrimaryExpression() PrimaryExpressionLR()
 | Index()
+| Selector()
   )
+}
+
+void Selector() : {}
+{
+  <TOKEN_DOT> Identifier()
 }
 
 void Index() : {}

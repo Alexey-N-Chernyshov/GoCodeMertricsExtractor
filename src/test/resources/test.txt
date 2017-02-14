@@ -1,27 +1,5 @@
 package main;
 
-import "fmt";
-
-type IntArray [16]int;
-
-type (
-	Point struct{
-	 x, y float64;
-	 }
-	Polar Point;
-)
-
-type TreeNode struct {
-	left, right *TreeNode
-	value *Comparable
-}
-
-type Block interface {
-	BlockSize() int;
-	Encrypt(src, dst []byte)
-	Decrypt(src, dst []byte)
-}
-
 func main() {
-    m["foo"];
+  op.op ;
 }
