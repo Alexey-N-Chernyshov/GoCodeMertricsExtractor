@@ -1,20 +1,20 @@
 package main;
 
 func main() {
-  go op.op ;
-  Error: op.op ;
-  break;
-  break error;
-  return 1;
-  return ;
+switch tag {
+default: s3;
+case 0, 1, 2, 3: s1;
+case 4, 5, 6, 7: s2;
+}
 
-  goto;
-  goto error;
+switch x ; {  // missing switch expression means "true"
+case x < 0: return -x;
+default: return x;
+}
 
-  continue;
-  continue error;
-
-  fallthrough;
-
-  defer 2 + 2;
+switch {
+case x < y: f1;
+case x < z: f2;
+case x == 4: f3;
+}
 }

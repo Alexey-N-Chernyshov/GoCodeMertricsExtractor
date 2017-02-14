@@ -33,6 +33,12 @@
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486986215235" />
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1486987236767" />
       <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487067957372" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487095899878" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487097101465" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487097460750" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487097649313" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487097670927" />
+      <excludeFolder url="file://$MODULE_DIR$/target/javacc-1487097678828" />
       <excludeFolder url="file://$MODULE_DIR$/target/test-classes" />
     </content>
     <orderEntry type="inheritedJdk" />

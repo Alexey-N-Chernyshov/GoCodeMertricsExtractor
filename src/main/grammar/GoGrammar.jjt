@@ -350,8 +350,8 @@ void Statement() : {}
 | GotoStmt()
 | FallthroughStmt()
 | Block()
-//| IfStmt
-// |  SwitchStmt
+| IfStmt()
+| SwitchStmt()
 //| SelectStmt
 //| ForStmt |
 | DeferStmt()
@@ -396,6 +396,43 @@ void FallthroughStmt() : {}
 void DeferStmt() : {}
 {
   <TOKEN_DEFER> Expression()
+}
+
+void ElseStmt() : {}
+{
+  <TOKEN_ELSE> ( IfStmt() | Block() )
+}
+
+void IfStmt() : {}
+{
+  <TOKEN_IF> (LOOKAHEAD(100) SimpleStatement() <TOKEN_SEMICOLON>)? Expression() Block() ( ElseStmt() )?
+}
+
+void SwitchStmt() #void : {}
+{
+  <TOKEN_SWITCH> (LOOKAHEAD(2) SimpleStatement() <TOKEN_SEMICOLON> )?
+  ( LOOKAHEAD(2) TypeSwitchStmt() | ExprSwitchStmt() )
+}
+
+void TypeSwitchStmt() : {}
+{
+  (LOOKAHEAD(2) Identifier() <TOKEN_COLONEQUAL> )? PrimaryExpression() <TOKEN_DOT> <TOKEN_LPAREN> <TOKEN_TYPE> <TOKEN_RPAREN>
+  <TOKEN_LCURLYBRACE> ( TypeCaseClause() )* <TOKEN_RCURLYBRACE>
+}
+
+void TypeCaseClause() : {}
+{
+  (<TOKEN_CASE> Type() (<TOKEN_COMMA> Type())*) | <TOKEN_DEFAULT>
+}
+
+void ExprSwitchStmt() : {}
+{
+  ( Expression() )? <TOKEN_LCURLYBRACE> ( ExprCaseClause() )* <TOKEN_RCURLYBRACE>
+}
+
+void ExprCaseClause() : {}
+{
+  (<TOKEN_CASE> ExpressionList() | <TOKEN_DEFAULT>) <TOKEN_COLON> StatementList()
 }
 
 void Label() : {}
