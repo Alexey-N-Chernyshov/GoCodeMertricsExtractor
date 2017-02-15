@@ -465,8 +465,10 @@ class PrintVisitor implements GoParserVisitor {
     }
 
     @Override
-    public Object visit(ASTShortVarDeclaration node, Object data) {
-        visitAllChildren(node, data);
+    public Object visit(ASTShortVarDecl node, Object data) {
+        node.jjtGetChild(0).jjtAccept(this, data);
+        out.print(" := ");
+        node.jjtGetChild(1).jjtAccept(this, data);
         return data;
     }
 
@@ -755,4 +757,36 @@ class PrintVisitor implements GoParserVisitor {
         visitAllChildren(node, data);
         return data;
     }
+
+    @Override
+    public Object visit(ASTMapType node, Object data) {
+        out.print("map ");
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTChannelType node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTConversion node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTTypeAssertion node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTSlice node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
 }

@@ -134,7 +134,7 @@ TOKEN:
                                   | "." (["0"-"9"])+ (<DECIMAL_EXPONENT>)? >
     | <#DECIMAL_EXPONENT: ["e","E"] (["+","-"])? (["0"-"9"])+>
 
-| <TOKEN_IMAGINARY_LITERAL: ((<TOKEN_FLOATING_POINT_LITERAL>)|(["0"-"9"])*)"i">
+| <TOKEN_IMAGINARY_LITERAL: ((<TOKEN_FLOATING_POINT_LITERAL>)|(["0"-"9"])+)"i">
 
 | <TOKEN_RUNE_LITERAL: "'" ( (<UNICODE_VALUE>) | (<BYTE_VALUE>) ) "'">
     | <#UNICODE_VALUE: ( ~["\n"]) | (<LITTLE_U_VALUE>) | (<BIG_U_VALUE>) | (<ESCAPED_CHAR>)>
@@ -238,7 +238,7 @@ void ParameterDecl() #void : {}
 
 void IdentifierList() : {}
 {
-  Identifier() ( <TOKEN_COMMA> Identifier() )*
+  Identifier() (LOOKAHEAD(2)  <TOKEN_COMMA> Identifier() )*
 }
 
 void FunctionBody() : {}
@@ -253,18 +253,27 @@ void TypeName() #void : {}
 | Identifier()
 }
 
-//TODO
 void TypeLit() #void : {}
 {
-  LOOKAHEAD(2)
-  ArrayType()
-| StructType()
-| PointerType()
-| FunctionType()
-| InterfaceType()
-| SliceType()
-//MapType
-// Channeltype
+  (LOOKAHEAD(100) ArrayType()
+| (LOOKAHEAD(100) StructType()
+| (LOOKAHEAD(100) PointerType()
+| (LOOKAHEAD(100) FunctionType()
+| (LOOKAHEAD(100) InterfaceType()
+| (LOOKAHEAD(100) SliceType()
+| (LOOKAHEAD(100) MapType()
+| ChannelType()
+)))))))
+}
+
+void MapType() : {}
+{
+  <TOKEN_MAP> <TOKEN_LSQUAREPAREN> Type() <TOKEN_RSQUAREPAREN> Type()
+}
+
+void ChannelType() : {}
+{
+  ( <TOKEN_CHAN> (LOOKAHEAD(2) <TOKEN_LESSMINUS> )? | <TOKEN_LESSMINUS> <TOKEN_CHAN> ) Type()
 }
 
 void ArrayType() : {}
@@ -336,7 +345,6 @@ void StatementList() : {}
   (Statement() <TOKEN_SEMICOLON> )*
 }
 
-//TODO
 void Statement() : {}
 {
   (LOOKAHEAD(2)
@@ -494,18 +502,22 @@ void Label() : {}
   Identifier()
 }
 
-//TODO
 void SimpleStatement() : {}
 {
 //EmptyStmt
-//| SendStmt
- (LOOKAHEAD(100)
- IncDecStmt()
+  (LOOKAHEAD(100) SendStmt()
+| (LOOKAHEAD(100) IncDecStmt()
+| (LOOKAHEAD(100) ShortVarDecl()
 | (LOOKAHEAD(100) Assignment()
-//| ShortVarDecl
-| (LOOKAHEAD(100) ShortVarDeclaration()
 | Expression()
   )))
+  )
+}
+
+void ShortVarDecl() : {}
+{
+//  IdentifierList() <TOKEN_COLONEQUAL> ExpressionList()
+  ExpressionList() <TOKEN_COLONEQUAL> ExpressionList()
 }
 
 void IncDecStmt() #void : {}
@@ -526,11 +538,6 @@ void DecStmt() : {}
 void Assignment() : {}
 {
   ExpressionList() (<TOKEN_PLUSEQUAL> | <TOKEN_MINUSEQUAL> | <TOKEN_EQUAL> ) ExpressionList()
-}
-
-void ShortVarDeclaration() : {}
-{
-  IdentifierList() <TOKEN_COLONEQUAL> ExpressionList()
 }
 
 SimpleNode SourceFile() : {}
@@ -646,12 +653,10 @@ void OperandName() #void : {}
 | Identifier()
 }
 
-//TODO
 void ReceiverType() : {}
 {
-  TypeName()
-//  | <TOKEN_LPAREN> ReceiverType() <TOKEN_RPAREN>
-//  | <TOKEN_LPAREN> <TOKEN_MULT> TypeName() <TOKEN_RPAREN>
+  (<TOKEN_LPAREN> ( ReceiverType() <TOKEN_RPAREN> | <TOKEN_MULT> TypeName() ) <TOKEN_RPAREN> )
+| TypeName()
 }
 
 void MethodExpression() : {}
@@ -659,35 +664,50 @@ void MethodExpression() : {}
   ReceiverType() <TOKEN_DOT> MethodName()
 }
 
-//TODO
 void Operand() : {}
 {
-  (LOOKAHEAD(3)
-//  MethodExpression()
- <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
-| OperandName()
+  (LOOKAHEAD(100)
+  OperandName()
+| (LOOKAHEAD(100) MethodExpression()
+| <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
 | Literal()
-  )
+  ))
 }
 
-// TODO
+void Conversion() : {}
+{
+  Type() <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
+}
+
 void PrimaryExpression() : {}
 {
+  (LOOKAHEAD(100)
   Operand() ( LOOKAHEAD(2) PrimaryExpressionLR() )?
-// | Conversion()
+| Conversion()
+  )
 }
 
 //to avoid Left Recursion
 void PrimaryExpressionLR() #void : {}
 {
-  (LOOKAHEAD(3)
-//Slice()
-//TypeAssertion()
-  Arguments()
-| Index()
-| Selector()
+  (LOOKAHEAD(100) Slice()
+| ( LOOKAHEAD(100) TypeAssertion()
+| ( LOOKAHEAD(100) Arguments()
+| ( LOOKAHEAD(100) Index()
+| ( LOOKAHEAD(100) Selector()
 | PrimaryExpression() PrimaryExpressionLR()
-  )
+  )))))
+}
+
+void Slice() : {}
+{
+  <TOKEN_LSQUAREPAREN> Expression() <TOKEN_COLON>
+  (LOOKAHEAD(100) Expression() <TOKEN_COLON> )? Expression() <TOKEN_RSQUAREPAREN>
+}
+
+void TypeAssertion() : {}
+{
+  <TOKEN_DOT> <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
 }
 
 void Selector() : {}
@@ -717,6 +737,7 @@ void ExpressionList() : {}
 
 void UnaryExpression() #void : { Token t; }
 {
+  (LOOKAHEAD(100)
   PrimaryExpression()
 | t = <TOKEN_PLUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryPlus(1)
 | t = <TOKEN_MINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryMinus(1)
@@ -725,6 +746,7 @@ void UnaryExpression() #void : { Token t; }
 | t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; } #UnaryMult(1)
 | t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; } #UnaryAnd(1)
 | t = <TOKEN_LESSMINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryLessMinus(1)
+  )
 }
 
 void MultOperators() #void : { Token t; }
