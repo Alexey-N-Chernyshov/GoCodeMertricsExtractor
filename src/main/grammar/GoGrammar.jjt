@@ -352,7 +352,7 @@ void Statement() : {}
 | Block()
 | IfStmt()
 | SwitchStmt()
-//| SelectStmt
+| SelectStmt()
 | ForStmt()
 | DeferStmt()
   )
@@ -406,6 +406,33 @@ void ElseStmt() : {}
 void IfStmt() : {}
 {
   <TOKEN_IF> (LOOKAHEAD(100) SimpleStatement() <TOKEN_SEMICOLON>)? Expression() Block() ( ElseStmt() )?
+}
+
+void SelectStmt() : {}
+{
+  <TOKEN_SELECT> <TOKEN_LCURLYBRACE>
+  (
+  (<TOKEN_CASE> (LOOKAHEAD(100) SendStmt() | RecvStmt()) | <TOKEN_DEFAULT>) <TOKEN_COLON> StatementList()
+  )*
+  <TOKEN_RCURLYBRACE>
+}
+
+void RecvStmt() : {}
+{
+  (LOOKAHEAD(100)
+    ( ExpressionList() <TOKEN_EQUAL> Expression())
+  | (LOOKAHEAD(100) (IdentifierList() <TOKEN_COLONEQUAL> Expression())
+  | Expression()))
+}
+
+void SendStmt() : {}
+{
+  Channel() <TOKEN_LESSMINUS> Expression()
+}
+
+void Channel() : {}
+{
+  Expression()
 }
 
 void SwitchStmt() #void : {}
@@ -474,14 +501,11 @@ void SimpleStatement() : {}
 //| SendStmt
  (LOOKAHEAD(100)
  IncDecStmt()
-//| Assignment
+| (LOOKAHEAD(100) Assignment()
 //| ShortVarDecl
-| (LOOKAHEAD(100)
-  ShortVarDeclaration()
-//| Assignment()
+| (LOOKAHEAD(100) ShortVarDeclaration()
 | Expression()
-  )
-  )
+  )))
 }
 
 void IncDecStmt() #void : {}
@@ -649,9 +673,7 @@ void Operand() : {}
 // TODO
 void PrimaryExpression() : {}
 {
-  LOOKAHEAD(3)
-  Operand()
-| Operand() PrimaryExpressionLR()
+  Operand() ( LOOKAHEAD(2) PrimaryExpressionLR() )?
 // | Conversion()
 }
 
@@ -662,9 +684,9 @@ void PrimaryExpressionLR() #void : {}
 //Slice()
 //TypeAssertion()
   Arguments()
-| PrimaryExpression() PrimaryExpressionLR()
 | Index()
 | Selector()
+| PrimaryExpression() PrimaryExpressionLR()
   )
 }
 
