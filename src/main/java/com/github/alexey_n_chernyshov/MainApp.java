@@ -17,7 +17,7 @@ public class MainApp {
 
         Preprocessor p = new Preprocessor();
         GoParser parser = new GoParser(p.addSemicolons(new FileInputStream(args[0])));
-        SimpleNode root = parser.SourceFile();
+        SimpleNode root = parser.getRoot();
 
         System.out.println("Abstract Syntax Tree:");
         root.dump(" ");

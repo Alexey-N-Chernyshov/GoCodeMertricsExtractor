@@ -14,6 +14,8 @@ PARSER_BEGIN(GoParser)
 
 package com.github.alexey_n_chernyshov;
 
+import java.io.InputStream;
+
 /**
  * Parses go lang source and produces AST.
  * Go lang source should be preprocessed before parsing to be ensure that
@@ -21,6 +23,12 @@ package com.github.alexey_n_chernyshov;
  */
 public class GoParser
 {
+    /**
+      * Parses input stream and returns root node.
+      */
+    public SimpleNode getRoot() throws ParseException {
+        return SourceFile();
+    }
 }
 
 PARSER_END(GoParser)
@@ -193,7 +201,6 @@ void Literal() #void : {}
 | ImaginaryLiteral()
 | RuneLiteral()
 | StringLiteral()
-
 | FunctionLit()
 }
 
@@ -347,23 +354,22 @@ void StatementList() : {}
 
 void Statement() : {}
 {
-  (LOOKAHEAD(2)
-  LabeledStmt()
-| Declaration()
-| SimpleStatement()
-| GoStmt()
-| ReturnStmt()
-| BreakStmt()
-| ContinueStmt()
-| GotoStmt()
-| FallthroughStmt()
-| Block()
-| IfStmt()
-| SwitchStmt()
-| SelectStmt()
-| ForStmt()
+  (LOOKAHEAD(100) LabeledStmt()
+| (LOOKAHEAD(100) Declaration()
+| (LOOKAHEAD(100) SimpleStatement()
+| (LOOKAHEAD(100) GoStmt()
+| (LOOKAHEAD(100) ReturnStmt()
+| (LOOKAHEAD(100) BreakStmt()
+| (LOOKAHEAD(100) ContinueStmt()
+| (LOOKAHEAD(100) GotoStmt()
+| (LOOKAHEAD(100) FallthroughStmt()
+| (LOOKAHEAD(100) Block()
+| (LOOKAHEAD(100) IfStmt()
+| (LOOKAHEAD(100) SwitchStmt()
+| (LOOKAHEAD(100) SelectStmt()
+| (LOOKAHEAD(100) ForStmt()
 | DeferStmt()
-  )
+  ))))))))))))))
 }
 
 void LabeledStmt() : {}
@@ -473,12 +479,9 @@ void ExprCaseClause() : {}
 void ForStmt() : {}
 {
   <TOKEN_FOR>
-  ( LOOKAHEAD(100)
-  RangeClause() |
-  (LOOKAHEAD(100)
-  ForClause()
-  | Condition()
-  )
+  ( LOOKAHEAD(100) RangeClause()
+  | (LOOKAHEAD(100) ForClause()
+  | Condition() )
   )? Block()
 }
 
@@ -494,7 +497,8 @@ void ForClause() : {}
 
 void RangeClause() : {}
 {
-  (LOOKAHEAD(100) IdentifierList() <TOKEN_COLONEQUAL> | ExpressionList() <TOKEN_EQUAL> ) <TOKEN_RANGE> Expression()
+  (LOOKAHEAD(100) IdentifierList() <TOKEN_COLONEQUAL>
+  | ExpressionList() <TOKEN_EQUAL> ) <TOKEN_RANGE> Expression()
 }
 
 void Label() : {}
@@ -682,8 +686,8 @@ void Conversion() : {}
 void PrimaryExpression() : {}
 {
   (LOOKAHEAD(100)
-  Operand() ( LOOKAHEAD(2) PrimaryExpressionLR() )?
-| Conversion()
+  Operand() ( LOOKAHEAD(100) PrimaryExpressionLR() )*
+| Conversion() ( LOOKAHEAD(100) PrimaryExpressionLR() )*
   )
 }
 
@@ -752,15 +756,14 @@ void UnaryExpression() #void : { Token t; }
 void MultOperators() #void : { Token t; }
 {
   UnaryExpression() (
-    LOOKAHEAD(2) (
-    (t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; }           #Mult(2) )
-  | (t = <TOKEN_DIV> UnaryExpression() { jjtThis.value = t.image; }            #Div(2)  )
-  | (t = <TOKEN_PERCENT> UnaryExpression() { jjtThis.value = t.image; }        #DivInt(2) )
-  | (t = <TOKEN_LESSLESS> UnaryExpression() { jjtThis.value = t.image; }       #ShiftLeft(2) )
-  | (t = <TOKEN_GREATERGREATER> UnaryExpression() { jjtThis.value = t.image; } #ShiftRight(2) )
-  | (t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; }            #And(2) )
-  | (t = <TOKEN_ANDXOR> UnaryExpression() { jjtThis.value = t.image; }         #AndXor(2) )
-    )
+    LOOKAHEAD(100) ((t = <TOKEN_MULT> UnaryExpression() { jjtThis.value = t.image; }           #Mult(2) )
+  | LOOKAHEAD(100) ((t = <TOKEN_DIV> UnaryExpression() { jjtThis.value = t.image; }            #Div(2)  )
+  | LOOKAHEAD(100) ((t = <TOKEN_PERCENT> UnaryExpression() { jjtThis.value = t.image; }        #DivInt(2) )
+  | LOOKAHEAD(100) ((t = <TOKEN_LESSLESS> UnaryExpression() { jjtThis.value = t.image; }       #ShiftLeft(2) )
+  | LOOKAHEAD(100) ((t = <TOKEN_GREATERGREATER> UnaryExpression() { jjtThis.value = t.image; } #ShiftRight(2) )
+  | LOOKAHEAD(100) ((t = <TOKEN_AND> UnaryExpression() { jjtThis.value = t.image; }            #And(2) )
+  | LOOKAHEAD(100) ((t = <TOKEN_ANDXOR> UnaryExpression() { jjtThis.value = t.image; }         #AndXor(2) )
+    )))))))
   )*
 }
 

@@ -21,9 +21,9 @@ public class Preprocessor {
                             s.endsWith(")") || s.endsWith("]") || s.endsWith("}"))
                         sb.append(s + ";\n");
                     else {
-                        String[] wordList = s.split("\\s+\\*");
+                        String[] wordList = s.split("\\s+");
                         String lastWord = wordList[wordList.length - 1];
-                        if (lastWord.matches("[a-z_A-Z]\\w*") ||
+                        if (lastWord.matches("[a-z_A-Z].*") ||
 
                                 lastWord.matches("-?\\d+i?") ||
 
@@ -46,7 +46,8 @@ public class Preprocessor {
                 }
         );
 
-        System.out.println(sb.toString());
+        //TODO
+//        System.out.println(sb.toString());
         return new ByteArrayInputStream(sb.toString().getBytes(StandardCharsets.UTF_8));
     }
 }
