@@ -161,7 +161,7 @@ TOKEN:
     | <#RAW_STRING_LITERAL: "`" (~[])* "`">
     | <#INTERPRETED_STRING_LITERAL: "\"" ((<UNICODE_VALUE>) | (<BYTE_VALUE>))* "\"">
 
-| <TOKEN_IDENTIFIER: ["a"-"z", "A"-"Z", "_"](["a"-"z", "A"-"Z", "_", "0"-"9"])*>
+| <TOKEN_IDENTIFIER: ["a"-"z", "A"-"Z", "_"](["a"-"z", "A"-"Z", "0"-"9", "_"])*>
 }
 
 
@@ -194,14 +194,64 @@ void StringLiteral() : { Token t; }
 
 void Literal() #void : {}
 {
-  LOOKAHEAD(2)
   /* Base literals */
-  IntegerLiteral()
-| FloatLiteral()
-| ImaginaryLiteral()
-| RuneLiteral()
-| StringLiteral()
-| FunctionLit()
+  (LOOKAHEAD(100) IntegerLiteral()
+| (LOOKAHEAD(100) FloatLiteral()
+| (LOOKAHEAD(100) ImaginaryLiteral()
+| (LOOKAHEAD(100) RuneLiteral()
+| (LOOKAHEAD(100) StringLiteral()
+
+| (LOOKAHEAD(100) FunctionLit()
+
+| CompositeLit()
+))))))
+}
+
+void CompositeLit() : {}
+{
+  LiteralType() LiteralValue()
+}
+
+void LiteralType() : {}
+{
+  (LOOKAHEAD(100) StructType()
+| (LOOKAHEAD(100) ArrayType()
+| (LOOKAHEAD(100) <TOKEN_RSQUAREPAREN> <TOKEN_ELLIPSIS> <TOKEN_RSQUAREPAREN> Type()
+| (LOOKAHEAD(100) SliceType()
+| (LOOKAHEAD(100) MapType()
+| TypeName()
+)))))
+}
+
+void LiteralValue() : {}
+{
+  <TOKEN_LCURLYBRACE> (LOOKAHEAD(100) ElementList() (LOOKAHEAD(100) <TOKEN_COMMA>)? )? <TOKEN_RCURLYBRACE>
+}
+
+void ElementList() : {}
+{
+  KeyedElement() (LOOKAHEAD(100) <TOKEN_COMMA> KeyedElement() )*
+}
+
+void KeyedElement() : {}
+{
+  (LOOKAHEAD(100) Key() <TOKEN_COLON>)? Element()
+}
+
+void Key() : {}
+{
+  (LOOKAHEAD(100) Identifier()
+| (LOOKAHEAD(100) Expression()
+| LiteralValue()
+))
+}
+
+void Element() : {}
+{
+  (LOOKAHEAD(100)
+  Expression()
+| LiteralValue()
+)
 }
 
 void FunctionLit() : {}
@@ -221,7 +271,7 @@ void Signature() #void : {}
 
 void Result() : {}
 {
-  LOOKAHEAD(3)
+  LOOKAHEAD(1000)
   Parameters()
 | Type()
 }
@@ -255,9 +305,10 @@ void FunctionBody() : {}
 
 void TypeName() #void : {}
 {
-  LOOKAHEAD(2)
+  (LOOKAHEAD(100)
   QualifiedIdentifier()
 | Identifier()
+  )
 }
 
 void TypeLit() #void : {}
@@ -337,9 +388,9 @@ void InterfaceTypeName() : {}
 
 void Type() : {}
 {
-  <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
-| TypeLit()
-| TypeName()
+  (LOOKAHEAD(1000) TypeName()
+| (LOOKAHEAD(1000) <TOKEN_LPAREN> Type() <TOKEN_RPAREN>
+| TypeLit()))
 }
 
 void Block() : {}
@@ -349,25 +400,25 @@ void Block() : {}
 
 void StatementList() : {}
 {
-  (Statement() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )*
+  (LOOKAHEAD(1000) Statement() (<TOKEN_SEMICOLON>)? )*
 }
 
 void Statement() : {}
 {
-  (LOOKAHEAD(100) LabeledStmt()
-| (LOOKAHEAD(100) Declaration()
-| (LOOKAHEAD(100) SimpleStatement()
-| (LOOKAHEAD(100) GoStmt()
-| (LOOKAHEAD(100) ReturnStmt()
-| (LOOKAHEAD(100) BreakStmt()
-| (LOOKAHEAD(100) ContinueStmt()
-| (LOOKAHEAD(100) GotoStmt()
-| (LOOKAHEAD(100) FallthroughStmt()
-| (LOOKAHEAD(100) Block()
-| (LOOKAHEAD(100) IfStmt()
-| (LOOKAHEAD(100) SwitchStmt()
-| (LOOKAHEAD(100) SelectStmt()
-| (LOOKAHEAD(100) ForStmt()
+  (LOOKAHEAD(1000) LabeledStmt()
+| (LOOKAHEAD(1000) Declaration()
+| (LOOKAHEAD(1000) SimpleStatement()
+| (LOOKAHEAD(1000) GoStmt()
+| (LOOKAHEAD(1000) ReturnStmt()
+| (LOOKAHEAD(1000) BreakStmt()
+| (LOOKAHEAD(1000) ContinueStmt()
+| (LOOKAHEAD(1000) GotoStmt()
+| (LOOKAHEAD(1000) FallthroughStmt()
+| (LOOKAHEAD(1000) Block()
+| (LOOKAHEAD(1000) IfStmt()
+| (LOOKAHEAD(1000) SwitchStmt()
+| (LOOKAHEAD(1000) SelectStmt()
+| (LOOKAHEAD(1000) ForStmt()
 | DeferStmt()
   ))))))))))))))
 }
@@ -451,24 +502,24 @@ void Channel() : {}
 
 void SwitchStmt() #void : {}
 {
-  <TOKEN_SWITCH> (LOOKAHEAD(2) SimpleStatement() <TOKEN_SEMICOLON> )?
-  ( LOOKAHEAD(2) TypeSwitchStmt() | ExprSwitchStmt() )
+  <TOKEN_SWITCH> (LOOKAHEAD(1000) SimpleStatement() <TOKEN_SEMICOLON> )?
+  ( LOOKAHEAD(1000) TypeSwitchStmt() | ExprSwitchStmt() )
 }
 
 void TypeSwitchStmt() : {}
 {
-  (LOOKAHEAD(2) Identifier() <TOKEN_COLONEQUAL> )? PrimaryExpression() <TOKEN_DOT> <TOKEN_LPAREN> <TOKEN_TYPE> <TOKEN_RPAREN>
-  <TOKEN_LCURLYBRACE> ( TypeCaseClause() )* <TOKEN_RCURLYBRACE>
+  (LOOKAHEAD(1000) Identifier() <TOKEN_COLONEQUAL> )? PrimaryExpression() <TOKEN_DOT> <TOKEN_LPAREN> <TOKEN_TYPE> <TOKEN_RPAREN>
+  <TOKEN_LCURLYBRACE> ( LOOKAHEAD(1000) TypeCaseClause() )* <TOKEN_RCURLYBRACE>
 }
 
 void TypeCaseClause() : {}
 {
-  (<TOKEN_CASE> Type() (<TOKEN_COMMA> Type())*) | <TOKEN_DEFAULT>
+  ( (<TOKEN_CASE> Type() (<TOKEN_COMMA> Type())* ) | <TOKEN_DEFAULT>) <TOKEN_COLON> StatementList()
 }
 
 void ExprSwitchStmt() : {}
 {
-  ( Expression() )? <TOKEN_LCURLYBRACE> ( ExprCaseClause() )* <TOKEN_RCURLYBRACE>
+  (LOOKAHEAD(100) Expression() )? <TOKEN_LCURLYBRACE> (LOOKAHEAD(1000) ExprCaseClause() )* <TOKEN_RCURLYBRACE>
 }
 
 void ExprCaseClause() : {}
@@ -580,7 +631,7 @@ void TopLevelDecl() : {}
 
 void MethodDecl(): {}
 {
-  Reciever() MethodName() (LOOKAHEAD(3) Function() | Signature())
+  Reciever() MethodName() (LOOKAHEAD(1000) Function() | Signature())
 }
 
 void Reciever() : {}
@@ -617,17 +668,19 @@ void ConstSpec() : {}
 
 void VarDecl() : {}
 {
-  <TOKEN_VAR> (VarSpec() | <TOKEN_LPAREN> (VarSpec())* <TOKEN_RPAREN>)
+  <TOKEN_VAR> (VarSpec() | <TOKEN_LPAREN> (VarSpec() (<TOKEN_SEMICOLON>)? )* <TOKEN_RPAREN>)
 }
 
 void VarSpec() : {}
 {
-  IdentifierList() (<TOKEN_EQUAL> ExpressionList() | Type() ( <TOKEN_EQUAL> ExpressionList() )?)
+  IdentifierList()
+  (LOOKAHEAD(100) ( Type() (<TOKEN_EQUAL> ExpressionList())? )
+| ( <TOKEN_EQUAL> ExpressionList() ))
 }
 
 void FunctionDecl() : {}
 {
-  FunctionName() (LOOKAHEAD(3) Function() | Signature())
+  FunctionName() (LOOKAHEAD(1000) Function() | Signature())
 }
 
 void FunctionName() : {}
@@ -652,9 +705,10 @@ void QualifiedIdentifier() #void : {}
 
 void OperandName() #void : {}
 {
-  LOOKAHEAD(2)
+  (LOOKAHEAD(100)
   QualifiedIdentifier()
 | Identifier()
+  )
 }
 
 void ReceiverType() : {}
@@ -670,12 +724,11 @@ void MethodExpression() : {}
 
 void Operand() : {}
 {
-  (LOOKAHEAD(100)
-  OperandName()
+  (LOOKAHEAD(100) OperandName()
 | (LOOKAHEAD(100) MethodExpression()
-| <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
+| (LOOKAHEAD(100) <TOKEN_LPAREN> Expression() <TOKEN_RPAREN>
 | Literal()
-  ))
+  )))
 }
 
 void Conversion() : {}
@@ -705,8 +758,8 @@ void PrimaryExpressionLR() #void : {}
 
 void Slice() : {}
 {
-  <TOKEN_LSQUAREPAREN> Expression() <TOKEN_COLON>
-  (LOOKAHEAD(100) Expression() <TOKEN_COLON> )? Expression() <TOKEN_RSQUAREPAREN>
+  <TOKEN_LSQUAREPAREN> ( Expression() )? <TOKEN_COLON>
+  (LOOKAHEAD(100) Expression() <TOKEN_COLON> )? (LOOKAHEAD(100) Expression() )? <TOKEN_RSQUAREPAREN>
 }
 
 void TypeAssertion() : {}
@@ -728,7 +781,7 @@ void Arguments() : {}
 {
   <TOKEN_LPAREN>
   (
-  (LOOKAHEAD(3) ExpressionList() | Type() (LOOKAHEAD(2) <TOKEN_COMMA> ExpressionList())? )
+  (LOOKAHEAD(100) ExpressionList() | Type() (LOOKAHEAD(100) <TOKEN_COMMA> ExpressionList())? )
   (<TOKEN_ELLIPSIS>)? (<TOKEN_COMMA>)?
   )?
   <TOKEN_RPAREN>

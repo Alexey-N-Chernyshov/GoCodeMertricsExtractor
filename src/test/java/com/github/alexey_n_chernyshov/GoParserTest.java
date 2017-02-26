@@ -61,12 +61,24 @@ public class GoParserTest {
     }
 
     /**
-     * Test "Values.go" program with literals. Shouldn't throw ParseException.
+     * Test "values.go" program with literals. Shouldn't throw ParseException.
      */
     @Test
     public void testValues() {
         try {
-            parseFile("src/test/resources/Values.go");
+            parseFile("src/test/resources/grammar/values.go");
+        } catch (Exception e) {
+            fail("Caught an exception " + e.toString());
+        }
+    }
+
+    /**
+     * Test "typeswitch.go" program with type switch statement. Shouldn't throw ParseException.
+     */
+    @Test
+    public void testTypeSwitchStatement() {
+        try {
+            parseFile("src/test/resources/grammar/typeswitch.go");
         } catch (Exception e) {
             fail("Caught an exception " + e.toString());
         }

@@ -31,7 +31,9 @@ public class Preprocessor {
                     else {
                         String[] wordList = s.split("\\s+");
                         String lastWord = wordList[wordList.length - 1];
-                        if (lastWord.matches("[a-z_A-Z].*") ||
+                        if (!lastWord.endsWith(":") &&
+                                !lastWord.endsWith(",") &&
+                                lastWord.matches("[a-z_A-Z].*") ||
 
                                 lastWord.matches("-?\\d+i?") ||
 

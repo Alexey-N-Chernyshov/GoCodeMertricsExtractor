@@ -11,9 +11,17 @@ public class MainApp {
 
     public static void main(String[] args) throws ParseException, FileNotFoundException {
         if (args.length < 1) {
-            System.out.println("Please pass in the filename.");
+            System.out.println("Please pass in the path.");
             System.exit(1);
         }
+
+//        try {
+//            MetricExtractor me = new MetricExtractor();
+//            me.parseDir(args[0]);
+//            me.printRepot();
+//        } catch (Exception e) {
+//            System.out.println(e);
+//        }
 
         Preprocessor p = new Preprocessor();
         GoParser parser = new GoParser(p.addSemicolons(new FileInputStream(args[0])));

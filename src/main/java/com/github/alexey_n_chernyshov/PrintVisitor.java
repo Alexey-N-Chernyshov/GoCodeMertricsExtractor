@@ -789,4 +789,45 @@ class PrintVisitor implements GoParserVisitor {
         return data;
     }
 
+    @Override
+    public Object visit(ASTCompositeLit node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTLiteralType node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTLiteralValue node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTElementList node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTKeyedElement node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTKey node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
+
+    @Override
+    public Object visit(ASTElement node, Object data) {
+        visitAllChildren(node, data);
+        return data;
+    }
 }
