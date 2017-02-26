@@ -12,6 +12,14 @@ import java.nio.charset.StandardCharsets;
 
 public class Preprocessor {
 
+    /**
+     * Adds semicolons. Not all semicolons are added, the Parser sets
+     * them in a proper way with LOOKAHEAD. This class only speeds up
+     * the parsing.
+     *
+     * @param stream
+     * @return
+     */
     InputStream addSemicolons(InputStream stream) {
         StringBuilder sb = new StringBuilder();
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));

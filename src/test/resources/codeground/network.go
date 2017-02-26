@@ -9,11 +9,11 @@ import (
 
 const (
 	Latency            = 10 * time.Millisecond
-	Bandwidth          = 1000;                   // 1Gb ethernet
-	HeartbeatInterval  = 500 * time.Millisecond; // FIXME: what should it be?
-	HeartbeatTolerance = 3;                      // forget about a node after 3 missed heartbeats
-	MTBF               = 24.0;                   // Mean Time Between Failures, hours
-	TBFDispersion      = 5.0;                    // Dispersion for Gaussian distribution of Time Between Failures
+	Bandwidth          = 1000                   // 1Gb ethernet
+	HeartbeatInterval  = 500 * time.Millisecond // FIXME: what should it be?
+	HeartbeatTolerance = 3                      // forget about a node after 3 missed heartbeats
+	MTBF               = 24.0                   // Mean Time Between Failures, hours
+	TBFDispersion      = 5.0                    // Dispersion for Gaussian distribution of Time Between Failures
 )
 
 // FIXME: interface{} instead of SpaceCube to avoid dependence on application.go?
@@ -41,8 +41,7 @@ func SimpleNode(worker WorkerFunc, failer func(*time.Ticker), workQueue <-chan S
 	ticker := time.NewTicker(HeartbeatInterval)
 	heartbeat = ticker.C
 	go worker(workQueue, resultQueue)
-	failer(ticker)
-	 // failer is supposed to start it's own goroutine.
+	failer(ticker) // failer is supposed to start it's own goroutine.
 	return
 }
 

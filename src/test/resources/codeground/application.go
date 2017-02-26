@@ -22,7 +22,7 @@ func (cube SpaceCube) Split() (cubes [8]SpaceCube) {
 	w2 := cube.w / 2
 	h2 := cube.h / 2
 	d2 := cube.d / 2
-	c8 := cube.complexity / 8; // FIXME: uneven complexity division
+	c8 := cube.complexity / 8 // FIXME: uneven complexity division
 
 	cubes[0].x = cube.x
 	cubes[0].y = cube.y
@@ -93,8 +93,8 @@ func (cube SpaceCube) Split() (cubes [8]SpaceCube) {
 
 func SimpleWorker(workQueue <-chan SpaceCube, resultQueue chan<- SpaceCube) {
 	for cube := range workQueue {
-		cube.Process();                                // here we sleep simulating busy work
-		SendMesssage(func() { resultQueue <- cube; }); // resultQueue <- cube
+		cube.Process()                               // here we sleep simulating busy work
+		SendMesssage(func() { resultQueue <- cube }) // resultQueue <- cube
 	}
 	// FIXME: close(resultQueue)
 }

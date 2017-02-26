@@ -290,7 +290,7 @@ void ArrayType() : {}
 
 void StructType() : {}
 {
-  <TOKEN_STRUCT> <TOKEN_LCURLYBRACE> (FieldDecl() <TOKEN_SEMICOLON>)* <TOKEN_RCURLYBRACE>
+  <TOKEN_STRUCT> <TOKEN_LCURLYBRACE> (FieldDecl() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)?)* <TOKEN_RCURLYBRACE>
 }
 
 void FunctionType() : {}
@@ -310,7 +310,7 @@ void FieldDecl() : {}
 
 void InterfaceType() : {}
 {
-  <TOKEN_INTERFACE> <TOKEN_LCURLYBRACE> ( MethodSpec() <TOKEN_SEMICOLON> )* <TOKEN_RCURLYBRACE>
+  <TOKEN_INTERFACE> <TOKEN_LCURLYBRACE> ( MethodSpec() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )* <TOKEN_RCURLYBRACE>
 }
 
 void PointerType() : {}
@@ -349,7 +349,7 @@ void Block() : {}
 
 void StatementList() : {}
 {
-  (Statement() <TOKEN_SEMICOLON> )*
+  (Statement() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )*
 }
 
 void Statement() : {}
@@ -389,17 +389,17 @@ void ReturnStmt() : {}
 
 void BreakStmt() : {}
 {
-  <TOKEN_BREAK> (Label())?
+  <TOKEN_BREAK> (LOOKAHEAD(100) Label())?
 }
 
 void ContinueStmt() : {}
 {
-  <TOKEN_CONTINUE> (Label())?
+  <TOKEN_CONTINUE> (LOOKAHEAD(100) Label())?
 }
 
 void GotoStmt() : {}
 {
-  <TOKEN_GOTO> (Label())?
+  <TOKEN_GOTO> (LOOKAHEAD(100) Label())?
 }
 
 void FallthroughStmt() : {}
@@ -546,9 +546,9 @@ void Assignment() : {}
 
 SimpleNode SourceFile() : {}
 {
-  PackageClause() <TOKEN_SEMICOLON>
-  ( ImportDecl() <TOKEN_SEMICOLON> )*
-  ( TopLevelDecl() <TOKEN_SEMICOLON> )*
+  PackageClause() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)?
+  ( ImportDecl() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )*
+  ( TopLevelDecl() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )*
   <EOF> { return jjtThis; }
 }
 
@@ -559,7 +559,7 @@ void PackageClause() : {}
 
 void ImportDecl() : {}
 {
-  <TOKEN_IMPORT> ( ImportSpec() | <TOKEN_LPAREN> ( ImportSpec() <TOKEN_SEMICOLON> )* <TOKEN_RPAREN> )
+  <TOKEN_IMPORT> ( ImportSpec() | <TOKEN_LPAREN> ( ImportSpec() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )* <TOKEN_RPAREN> )
 }
 
 void ImportSpec() #void : {}
@@ -597,12 +597,12 @@ void Declaration() : {}
 
 void ConstDecl() : {}
 {
-  <TOKEN_CONST> ( ConstSpec() | <TOKEN_LPAREN> (ConstSpec() <TOKEN_SEMICOLON>)* <TOKEN_RPAREN>)
+  <TOKEN_CONST> ( ConstSpec() | <TOKEN_LPAREN> (ConstSpec() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)?)* <TOKEN_RPAREN>)
 }
 
 void TypeDecl() : {}
 {
-  <TOKEN_TYPE> (TypeSpec() | <TOKEN_LPAREN> (TypeSpec() <TOKEN_SEMICOLON> )* <TOKEN_RPAREN> )
+  <TOKEN_TYPE> (TypeSpec() | <TOKEN_LPAREN> (TypeSpec() (LOOKAHEAD(100) <TOKEN_SEMICOLON>)? )* <TOKEN_RPAREN> )
 }
 
 void TypeSpec() : {}
@@ -612,7 +612,7 @@ void TypeSpec() : {}
 
 void ConstSpec() : {}
 {
-  IdentifierList() ( (Type())? <TOKEN_EQUAL> ExpressionList() )?
+  IdentifierList() (LOOKAHEAD(100) (Type())? <TOKEN_EQUAL> ExpressionList() )?
 }
 
 void VarDecl() : {}
