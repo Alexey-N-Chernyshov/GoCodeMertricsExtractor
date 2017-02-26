@@ -384,7 +384,7 @@ void GoStmt() : {}
 
 void ReturnStmt() : {}
 {
-  <TOKEN_RETURN> (ExpressionList())?
+  <TOKEN_RETURN> (LOOKAHEAD(2) ExpressionList())?
 }
 
 void BreakStmt() : {}

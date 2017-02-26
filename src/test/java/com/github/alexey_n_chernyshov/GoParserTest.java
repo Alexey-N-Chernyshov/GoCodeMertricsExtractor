@@ -79,6 +79,8 @@ public class GoParserTest {
     public void testCodeground() {
         try {
             parseFile("src/test/resources/codeground/application.go");
+            parseFile("src/test/resources/codeground/main.go");
+            parseFile("src/test/resources/codeground/network.go");
         } catch (Exception e) {
             fail("Caught an exception " + e.toString());
         }
