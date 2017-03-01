@@ -371,7 +371,7 @@ void PointerType() : {}
 
 void MethodSpec() : {}
 {
-  LOOKAHEAD(2)
+  LOOKAHEAD(100)
   MethodName() Signature()
 | InterfaceTypeName()
 }
@@ -738,9 +738,9 @@ void Conversion() : {}
 
 void PrimaryExpression() : {}
 {
-  (LOOKAHEAD(100)
-  Operand() ( LOOKAHEAD(100) PrimaryExpressionLR() )*
-| Conversion() ( LOOKAHEAD(100) PrimaryExpressionLR() )*
+  (LOOKAHEAD(1000)
+  Operand() ( LOOKAHEAD(1000) PrimaryExpressionLR() )*
+| Conversion() ( LOOKAHEAD(1000) PrimaryExpressionLR() )*
   )
 }
 
@@ -794,7 +794,7 @@ void ExpressionList() : {}
 
 void UnaryExpression() #void : { Token t; }
 {
-  (LOOKAHEAD(100)
+  (LOOKAHEAD(1000)
   PrimaryExpression()
 | t = <TOKEN_PLUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryPlus(1)
 | t = <TOKEN_MINUS> UnaryExpression() { jjtThis.value = t.image; } #UnaryMinus(1)
