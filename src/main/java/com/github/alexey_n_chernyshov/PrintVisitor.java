@@ -298,6 +298,12 @@ class PrintVisitor implements GoParserVisitor {
     }
 
     @Override
+    public Object visit(ASTFunction node, Object data) {
+        visitAllChildren(node, data);
+        return (data);
+    }
+
+    @Override
     public Object visit(ASTType node, Object data) {
         visitAllChildren(node, data);
         return data;

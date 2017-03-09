@@ -259,7 +259,7 @@ void FunctionLit() : {}
     <TOKEN_FUNC> Function()
 }
 
-void Function() #void : {}
+void Function() : {}
 {
   Signature() FunctionBody()
 }

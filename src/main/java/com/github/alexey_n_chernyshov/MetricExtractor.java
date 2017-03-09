@@ -42,15 +42,28 @@ public class MetricExtractor {
                 .forEach(p -> parseFile(p.toString()));
     }
 
+    private void printStatementCount(SimpleNode root) {
+        StatementCounterVisitor visitor = new StatementCounterVisitor();
+        root.jjtAccept(visitor, null);
+
+        System.out.println("Statment count: " + visitor.getStatements());
+    }
+
+    private void printCyclomaticComplexity(SimpleNode root) {
+        CyclomaticComplexityVisitor visitor = new CyclomaticComplexityVisitor();
+        root.jjtAccept(visitor, null);
+
+        for (Map.Entry<String, Integer> entry : visitor.getComplexity().entrySet()) {
+            System.out.println(entry.getKey() + ": " + entry.getValue());
+        }
+    }
+
     public void printRepot() {
         for (Map.Entry<String, SimpleNode> entry : sources.entrySet()) {
             System.out.println(entry.getKey());
 
-            StatementCounterVisitor visitor = new StatementCounterVisitor();
-            SimpleNode root = entry.getValue();
-            root.jjtAccept(visitor, null);
-
-            System.out.println("Statment count: " + visitor.getStatements());
+            printStatementCount(entry.getValue());
+            printCyclomaticComplexity(entry.getValue());
         }
     }
 
