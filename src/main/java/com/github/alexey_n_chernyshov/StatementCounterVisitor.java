@@ -1,17 +1,11 @@
 package com.github.alexey_n_chernyshov;
 
-public class StatementCounterVisitor implements GoParserVisitor {
+public class StatementCounterVisitor extends AbstractASTVisitor {
 
     private int statements;
 
     public int getStatements() {
         return statements;
-    }
-
-    private void visitAllChildren(SimpleNode node, Object data) {
-        for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-            node.jjtGetChild(i).jjtAccept(this, data);
-        }
     }
 
     @Override

@@ -45,6 +45,12 @@ public class MetricExtractor {
     public void printRepot() {
         for (Map.Entry<String, SimpleNode> entry : sources.entrySet()) {
             System.out.println(entry.getKey());
+
+            StatementCounterVisitor visitor = new StatementCounterVisitor();
+            SimpleNode root = entry.getValue();
+            root.jjtAccept(visitor, null);
+
+            System.out.println("Statment count: " + visitor.getStatements());
         }
     }
 
