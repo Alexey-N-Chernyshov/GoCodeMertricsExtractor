@@ -33,6 +33,7 @@ public class Preprocessor {
                         String lastWord = wordList[wordList.length - 1];
                         if (!lastWord.endsWith(":") &&
                                 !lastWord.endsWith(",") &&
+                                !lastWord.endsWith("{") &&
                                 lastWord.matches("[a-z_A-Z].*") ||
 
                                 lastWord.matches("-?\\d+i?") ||

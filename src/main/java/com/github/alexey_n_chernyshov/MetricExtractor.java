@@ -18,8 +18,12 @@ public class MetricExtractor {
 
     HashMap<String, SimpleNode> sources = new HashMap<>();
 
+    int exceptionCount = 0;
+    int totalParsed = 0;
+
     public void parseFile(String filename) {
         try {
+            totalParsed++;
             Preprocessor p = new Preprocessor();
             GoParser parser = new GoParser(p.addSemicolons(new FileInputStream(filename)));
             sources.put(filename, parser.getRoot());
@@ -27,6 +31,7 @@ public class MetricExtractor {
             //TODO hanlde exception (list of unparsed files with exceptions)
             System.out.println(filename);
             System.out.println(e);
+            exceptionCount++;
         }
     }
 

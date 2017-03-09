@@ -1,5 +1,8 @@
-package main
+package acache
 
-func SimpleWorker(workQueue <-chan SpaceCube, resultQueue chan<- SpaceCube) {
-  SendMesssage(func() { resultQueue <- cube })
+func (c *Cache) Get(key string, v interface{}) (err error) {
+memcache.Item
+	item := Item{
+    		Key:        key,
+    	}
 }
