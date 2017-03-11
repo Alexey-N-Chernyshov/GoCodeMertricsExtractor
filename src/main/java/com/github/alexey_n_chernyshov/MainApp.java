@@ -17,7 +17,7 @@ public class MainApp {
         try {
             MetricExtractor me = new MetricExtractor();
             me.parseDir(args[0]);
-            me.printRepot();
+            me.printReport();
             System.out.print(me.totalParsed + "/" + me.exceptionCount);
         } catch (Exception e) {
             System.out.println(e);

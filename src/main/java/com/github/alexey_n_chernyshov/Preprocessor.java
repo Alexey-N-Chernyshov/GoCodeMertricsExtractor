@@ -25,6 +25,7 @@ public class Preprocessor {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
         reader.lines().forEach(
                 s -> {
+                    s = s.trim();
                     if (s.endsWith("++") || s.endsWith("--") ||
                             s.endsWith(")") || s.endsWith("]") || s.endsWith("}"))
                         sb.append(s + ";\n");

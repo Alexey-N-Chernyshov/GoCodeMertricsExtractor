@@ -46,7 +46,7 @@ public class MetricExtractor {
         StatementCounterVisitor visitor = new StatementCounterVisitor();
         root.jjtAccept(visitor, null);
 
-        System.out.println("Statment count: " + visitor.getStatements());
+        System.out.println("Statement count: " + visitor.getStatements());
     }
 
     private void printCyclomaticComplexity(SimpleNode root) {
@@ -58,7 +58,7 @@ public class MetricExtractor {
         }
     }
 
-    public void printRepot() {
+    public void printReport() {
         for (Map.Entry<String, SimpleNode> entry : sources.entrySet()) {
             System.out.println(entry.getKey());
 
