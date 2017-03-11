@@ -75,6 +75,7 @@ public class MetricExtractor {
 
             printStatementCount(entry.getValue());
             printCyclomaticComplexity(entry.getValue());
+            printOOPMeasures(entry.getValue());
         }
     }
 
