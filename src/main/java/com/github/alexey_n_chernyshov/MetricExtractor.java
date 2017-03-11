@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 /**
@@ -58,12 +59,23 @@ public class MetricExtractor {
         }
     }
 
+    private void printOOPMeasures(SimpleNode root){
+        OOPMeasuresVisitor vis = new OOPMeasuresVisitor();
+        root.jjtAccept(vis, null);
+
+        for(Map.Entry<String, HashSet<String>> entry: vis.getStructure().entrySet()){
+            System.out.println(entry.getKey() + ": " + entry.getValue().size());
+        }
+
+    }
+
     public void printRepot() {
         for (Map.Entry<String, SimpleNode> entry : sources.entrySet()) {
             System.out.println(entry.getKey());
 
             printStatementCount(entry.getValue());
             printCyclomaticComplexity(entry.getValue());
+            printOOPMeasures(entry.getValue());
         }
     }
 
