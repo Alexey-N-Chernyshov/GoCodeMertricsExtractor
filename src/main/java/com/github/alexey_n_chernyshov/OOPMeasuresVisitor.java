@@ -11,10 +11,6 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         return structure;
     }
 
-    class VisitResult {
-        String identifier;
-    }
-
     @Override
     public Object visit(SimpleNode node, Object data) {
         visitAllChildren(node, data);
@@ -861,5 +857,9 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         visitAllChildren(node, data);
         return data;
 
+    }
+
+    class VisitResult {
+        String identifier;
     }
 }
