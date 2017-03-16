@@ -525,7 +525,11 @@ public class CyclomaticComplexityVisitor extends AbstractASTVisitor {
         if (!res.isLastReturnStatement())
             res.returnCount++;
 
-        functions.put(res.functionName, res.branchCount - res.returnCount + 2);
+        int cyclomaticComplexity = res.branchCount - res.returnCount + 2;
+        if (cyclomaticComplexity == 0)
+            cyclomaticComplexity += 1;
+
+        functions.put(res.functionName, cyclomaticComplexity);
 
         return data;
     }
@@ -786,4 +790,5 @@ public class CyclomaticComplexityVisitor extends AbstractASTVisitor {
             return (lastStatement != null) && (lastStatement instanceof ASTReturnStmt);
         }
     }
+
 }
