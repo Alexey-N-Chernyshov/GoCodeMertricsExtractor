@@ -1,14 +1,43 @@
 package com.github.alexey_n_chernyshov;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.HashSet;
 
+/**
+ * This class counts number of methods and number of attributes per struct
+ */
 public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
-    private HashMap<String, HashSet<String>> structure = new HashMap<>();
+    private HashSet<Structure> structures = new HashSet<>();
 
-    public HashMap<String, HashSet<String>> getStructure() {
-        return structure;
+    public HashSet<Structure> getStructures() {
+        return structures;
+    }
+
+
+
+    public class Structure {
+        private String structName;
+
+        private ArrayList<String> methods = new ArrayList<>();
+        private ArrayList<String> attributes = new ArrayList<>();
+
+        public ArrayList<String> getMethods() {
+            return methods;
+        }
+
+        public ArrayList<String> getAttributes() {
+            return attributes;
+        }
+
+        public String getStructName() {
+            return structName;
+        }
+    }
+
+    class VisitResult {
+        String identifier;
+        Node node;
     }
 
     @Override
@@ -489,6 +518,8 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
     @Override
     public Object visit(ASTMethodDecl node, Object data) {
         VisitResult res = new VisitResult();
+        boolean isFound = false;
+
         node.jjtGetChild(0).jjtAccept(this, res);
         String structName = res.identifier;
 
@@ -496,12 +527,17 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         node.jjtGetChild(1).jjtAccept(this, res);
         String methodName = res.identifier;
 
-        if(!structure.containsKey(structName)) {
-            HashSet<String> methods = new HashSet<>();
-            methods.add(methodName);
-            structure.put(structName, methods);
-        }else{
-            structure.get(structName).add(methodName);
+        for(Structure s:structures){
+            if (s.structName.equals(structName)) {
+                isFound = true;
+                s.methods.add(methodName);
+            }
+        }
+        if(!isFound){
+            Structure structure = new Structure();
+            structure.structName = structName;
+            structure.methods.add(methodName);
+            structures.add(structure);
         }
 
         //visit all other children
@@ -535,14 +571,44 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     @Override
     public Object visit(ASTTypeDecl node, Object data) {
-        visitAllChildren(node, data);
+        VisitResult res = new VisitResult();
+        boolean isFound = false;
+
+        node.jjtGetChild(0).jjtAccept(this, res);
+        String structName = res.identifier;
+
+
+        for(Structure s:structures){
+            if (s.structName.equals(structName)) {
+                isFound = true;
+            }
+        }
+        if(!isFound){
+            Structure structure = new Structure();
+            structure.structName = structName;
+            structures.add(structure);
+        }
+
+        //visit all other children
+        for (int i = 2; i < node.jjtGetNumChildren(); i++) {
+            node.jjtGetChild(i).jjtAccept(this, data);
+        }
+
         return data;
 
     }
 
     @Override
     public Object visit(ASTTypeSpec node, Object data) {
-        visitAllChildren(node, data);
+        VisitResult res = new VisitResult();
+        boolean isFound = false;
+
+        node.jjtGetChild(1).jjtAccept(this, res);
+        //String atrName = res.identifier;
+
+
+
+        // visitAllChildren(node, data);
         return data;
 
     }
@@ -585,8 +651,8 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
     @Override
     public Object visit(ASTIdentifier node, Object data) {
         if (data != null) {
-                ((VisitResult) data).identifier = (String) node.value;
-
+            ((VisitResult) data).identifier = (String) node.value;
+            ((VisitResult) data).node = node;
         }
         visitAllChildren(node, data);
         return data;
@@ -857,9 +923,5 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         visitAllChildren(node, data);
         return data;
 
-    }
-
-    class VisitResult {
-        String identifier;
     }
 }

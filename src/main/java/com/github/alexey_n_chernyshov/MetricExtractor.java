@@ -63,9 +63,9 @@ public class MetricExtractor {
         OOPMeasuresVisitor vis = new OOPMeasuresVisitor();
         root.jjtAccept(vis, null);
 
-        for(Map.Entry<String, HashSet<String>> entry: vis.getStructure().entrySet()){
+       /* for(Map.Entry<String, HashSet<String>> entry: vis.getStructure().entrySet()){
             System.out.println(entry.getKey() + ": " + entry.getValue().size());
-        }
+        }*/
 
     }
 
