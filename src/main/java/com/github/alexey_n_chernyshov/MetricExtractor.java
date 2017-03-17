@@ -4,8 +4,7 @@
 
 package com.github.alexey_n_chernyshov;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
@@ -77,10 +76,10 @@ public class MetricExtractor {
     /**
      * Outputs encountered problems in files.
      */
-    public void printProblemFiles() {
-        System.out.println("Problem files (total: " + problemFiles.size() + "):");
+    public void printProblemFiles(PrintStream out) {
         if (!problemFiles.isEmpty()) {
-            problemFiles.forEach((s) -> System.out.println(s));
+            out.println("Problem files (total: " + problemFiles.size() + "):");
+            problemFiles.forEach((s) -> out.println(s));
         }
     }
 
@@ -88,11 +87,25 @@ public class MetricExtractor {
      * Prints metrics for files:
      * - statements count
      */
-    public void printFilesMetrics() {
-        System.out.println("file metrics (total: " + sources.size() + ")");
-        System.out.println("filename statementCount");
+    public void printFilesMetrics(PrintStream out) {
+        out.println("filename" + SEPARATOR +
+                "statementCount" + SEPARATOR +
+                "structuresCount" + SEPARATOR +
+                "functionsCount" + SEPARATOR +
+                "cyclomaticComplexityMean" + SEPARATOR +
+                "cyclomaticComlexityMax"
+        );
         sources.forEach((s) -> {
-            System.out.println(s.filename + SEPARATOR + s.statementCount);
+            out.println(s.filename + SEPARATOR +
+                    s.statementCount + SEPARATOR +
+                    s.structs.size() + SEPARATOR +
+                    s.methods.size() + SEPARATOR +
+                    s.methods.stream()
+                            .mapToInt(Method::getCyclomaticComplexity)
+                            .average()
+                            .getAsDouble() + SEPARATOR +
+                    s.methods.stream().mapToInt(Method::getCyclomaticComplexity).max().getAsInt()
+            );
         });
     }
 
@@ -100,17 +113,12 @@ public class MetricExtractor {
      * Prints metrics for structures:
      * - methods attached to structure
      */
-    public void printStructMetrics() {
-        int totalStruct = 0;
-        for (SourceFile s : sources) {
-            totalStruct += s.structs.size();
-        }
-        System.out.println("struct metrics (total: " + totalStruct + ")");
-        System.out.println("filename structName methodCount");
+    public void printStructMetrics(PrintStream out) {
+        out.println("filename: structName" + SEPARATOR + "methodCount");
 
         for (SourceFile s : sources) {
             for (Struct struct : s.structs) {
-                System.out.println(s.filename + ": " + struct.name + SEPARATOR + struct.methodCount);
+                out.println(s.filename + ": " + struct.name + SEPARATOR + struct.methodCount);
             }
         }
     }
@@ -119,26 +127,34 @@ public class MetricExtractor {
      * Prints metrics for methods:
      * - cyclomatic complexity
      */
-    public void printMethodMetrics() {
-        int totalMethods = 0;
-        for (SourceFile s : sources) {
-            totalMethods += s.methods.size();
-        }
-        System.out.println("method metrics (total: " + totalMethods + ")");
-        System.out.println("filename methodName cyclomaticComplexity");
+    public void printMethodMetrics(PrintStream out) {
+        out.println("filename: methodName" + SEPARATOR + "cyclomaticComplexity");
 
         for (SourceFile s : sources) {
             for (Method method : s.methods) {
-                System.out.println(s.filename + ": " + method.name + SEPARATOR + method.cyclomaticComplexity);
+                out.println(s.filename + ": " + method.name + SEPARATOR + method.cyclomaticComplexity);
             }
         }
     }
 
+    /**
+     * Output report to the out stream.
+     */
     public void printReport() {
-        printProblemFiles();
-        printFilesMetrics();
-        printStructMetrics();
-        printMethodMetrics();
+        printProblemFiles(System.out);
+        printFilesMetrics(System.out);
+        printStructMetrics(System.out);
+        printMethodMetrics(System.out);
+    }
+
+    /**
+     * Prints reports with metrics to files.
+     */
+    public void printReportFiles() throws FileNotFoundException {
+        printProblemFiles(new PrintStream(new FileOutputStream("problemFiles.txt")));
+        printFilesMetrics(new PrintStream(new FileOutputStream("sourcesMetrics.txt")));
+        printStructMetrics(new PrintStream(new FileOutputStream("structMetrics.txt")));
+        printMethodMetrics(new PrintStream(new FileOutputStream("methodMetrics.txt")));
     }
 
     class ProblemFile {
@@ -167,6 +183,10 @@ public class MetricExtractor {
         Method(String name, int cyclomaticComplexity) {
             this.name = name;
             this.cyclomaticComplexity = cyclomaticComplexity;
+        }
+
+        int getCyclomaticComplexity() {
+            return cyclomaticComplexity;
         }
     }
 
