@@ -4,35 +4,65 @@
 
 package com.github.alexey_n_chernyshov;
 
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Extract metrics from projects in the Go lang.
  */
 public class MetricExtractor {
 
-    HashMap<String, SimpleNode> sources = new HashMap<>();
-
-    int exceptionCount = 0;
+    private final String SEPARATOR = "\t";
+    /**
+     * Map of parsed sources
+     */
+    HashMap<String, SimpleNode> astSources = new HashMap<>();
+    /**
+     * Contains all the metrics.
+     */
+    List<SourceFile> sources = new ArrayList<>();
+    /**
+     * List of files not parsed.
+     */
+    List<ProblemFile> problemFiles = new ArrayList<>();
     int totalParsed = 0;
+
+    /**
+     * @return number of files not parsed
+     */
+    int getProblemFilesCount() {
+        return problemFiles.size();
+    }
 
     public void parseFile(String filename) {
         try {
             totalParsed++;
             Preprocessor p = new Preprocessor();
             GoParser parser = new GoParser(p.addSemicolons(new FileInputStream(filename)));
-            sources.put(filename, parser.getRoot());
+            SimpleNode root = parser.getRoot();
+            astSources.put(filename, root);
+
+            StatementCounterVisitor statementCounterVisitor = new StatementCounterVisitor();
+            root.jjtAccept(statementCounterVisitor, null);
+
+            CyclomaticComplexityVisitor cyclomaticComplexityVisitor = new CyclomaticComplexityVisitor();
+            root.jjtAccept(cyclomaticComplexityVisitor, null);
+
+            OOPMeasuresVisitor oopMeasuresVisitor = new OOPMeasuresVisitor();
+            root.jjtAccept(oopMeasuresVisitor, null);
+
+            SourceFile sourceFile = new SourceFile(filename, statementCounterVisitor.getStatements());
+            for (Map.Entry<String, Integer> entry : cyclomaticComplexityVisitor.getComplexity().entrySet()) {
+                sourceFile.addFunction(new Method(entry.getKey(), entry.getValue()));
+            }
+            for (Map.Entry<String, HashSet<String>> entry : oopMeasuresVisitor.getStructure().entrySet()) {
+                sourceFile.addStruct(new Struct(entry.getKey(), entry.getValue().size()));
+            }
+            sources.add(sourceFile);
         } catch (Exception e) {
-            //TODO hanlde exception (list of unparsed files with exceptions)
-            System.out.println(filename);
-            System.out.println(e);
-            exceptionCount++;
+            problemFiles.add(new ProblemFile(filename, e.toString()));
         }
     }
 
@@ -43,39 +73,156 @@ public class MetricExtractor {
                 .forEach(p -> parseFile(p.toString()));
     }
 
-    private void printStatementCount(SimpleNode root) {
-        StatementCounterVisitor visitor = new StatementCounterVisitor();
-        root.jjtAccept(visitor, null);
-
-        System.out.println("Statment count: " + visitor.getStatements());
-    }
-
-    private void printCyclomaticComplexity(SimpleNode root) {
-        CyclomaticComplexityVisitor visitor = new CyclomaticComplexityVisitor();
-        root.jjtAccept(visitor, null);
-
-        for (Map.Entry<String, Integer> entry : visitor.getComplexity().entrySet()) {
-            System.out.println(entry.getKey() + ": " + entry.getValue());
+    /**
+     * Outputs encountered problems in files.
+     */
+    public void printProblemFiles(PrintStream out) {
+        if (!problemFiles.isEmpty()) {
+            out.println("Problem files (total: " + problemFiles.size() + "):");
+            problemFiles.forEach((s) -> out.println(s));
         }
     }
 
-    private void printOOPMeasures(SimpleNode root){
-        OOPMeasuresVisitor vis = new OOPMeasuresVisitor();
-        root.jjtAccept(vis, null);
-
-       /* for(Map.Entry<String, HashSet<String>> entry: vis.getStructure().entrySet()){
-            System.out.println(entry.getKey() + ": " + entry.getValue().size());
-        }*/
-
+    /**
+     * Prints metrics for files:
+     * - statements count
+     */
+    public void printFilesMetrics(PrintStream out) {
+        out.println("filename" + SEPARATOR +
+                "statementCount" + SEPARATOR +
+                "structuresCount" + SEPARATOR +
+                "functionsCount" + SEPARATOR +
+                "cyclomaticComplexityMean" + SEPARATOR +
+                "cyclomaticComlexityMax"
+        );
+        sources.forEach((s) -> {
+            out.println(s.filename + SEPARATOR +
+                    s.statementCount + SEPARATOR +
+                    s.structs.size() + SEPARATOR +
+                    s.methods.size() + SEPARATOR +
+                    s.methods.stream()
+                            .mapToInt(Method::getCyclomaticComplexity)
+                            .average()
+                            .getAsDouble() + SEPARATOR +
+                    s.methods.stream().mapToInt(Method::getCyclomaticComplexity).max().getAsInt()
+            );
+        });
     }
 
-    public void printReport() {
-        for (Map.Entry<String, SimpleNode> entry : sources.entrySet()) {
-            System.out.println(entry.getKey());
+    /**
+     * Prints metrics for structures:
+     * - methods attached to structure
+     */
+    public void printStructMetrics(PrintStream out) {
+        out.println("filename: structName" + SEPARATOR + "methodCount");
 
-            printStatementCount(entry.getValue());
-            printCyclomaticComplexity(entry.getValue());
-            printOOPMeasures(entry.getValue());
+        for (SourceFile s : sources) {
+            for (Struct struct : s.structs) {
+                out.println(s.filename + ": " + struct.name + SEPARATOR + struct.methodCount);
+            }
+        }
+    }
+
+    /**
+     * Prints metrics for methods:
+     * - cyclomatic complexity
+     */
+    public void printMethodMetrics(PrintStream out) {
+        out.println("filename: methodName" + SEPARATOR + "cyclomaticComplexity");
+
+        for (SourceFile s : sources) {
+            for (Method method : s.methods) {
+                out.println(s.filename + ": " + method.name + SEPARATOR + method.cyclomaticComplexity);
+            }
+        }
+    }
+
+    /**
+     * Output report to the out stream.
+     */
+    public void printReport() {
+        printProblemFiles(System.out);
+        printFilesMetrics(System.out);
+        printStructMetrics(System.out);
+        printMethodMetrics(System.out);
+    }
+
+    /**
+     * Prints reports with metrics to files.
+     */
+    public void printReportFiles() throws FileNotFoundException {
+        printProblemFiles(new PrintStream(new FileOutputStream("problemFiles.txt")));
+        printFilesMetrics(new PrintStream(new FileOutputStream("sourcesMetrics.txt")));
+        printStructMetrics(new PrintStream(new FileOutputStream("structMetrics.txt")));
+        printMethodMetrics(new PrintStream(new FileOutputStream("methodMetrics.txt")));
+    }
+
+    class ProblemFile {
+
+        String filename;
+        String problem;
+
+        ProblemFile(String filename, String problem) {
+            this.filename = filename;
+            this.problem = problem;
+        }
+
+        @Override
+        public String toString() {
+            return filename + ": " + problem;
+        }
+    }
+
+    /**
+     * Metrics for function of the source file.
+     */
+    class Method {
+        String name;
+        int cyclomaticComplexity;
+
+        Method(String name, int cyclomaticComplexity) {
+            this.name = name;
+            this.cyclomaticComplexity = cyclomaticComplexity;
+        }
+
+        int getCyclomaticComplexity() {
+            return cyclomaticComplexity;
+        }
+    }
+
+    /**
+     * Metrics for struct of the source file.
+     */
+    class Struct {
+        String name;
+        int methodCount;
+
+        Struct(String name, int methodCount) {
+            this.name = name;
+            this.methodCount = methodCount;
+        }
+    }
+
+    /**
+     * Stores all metrics parsed.
+     */
+    class SourceFile {
+        String filename;
+        int statementCount;
+        HashSet<Method> methods = new HashSet<>();
+        HashSet<Struct> structs = new HashSet<>();
+
+        SourceFile(String filename, int statementCount) {
+            this.filename = filename;
+            this.statementCount = statementCount;
+        }
+
+        void addFunction(Method method) {
+            methods.add(method);
+        }
+
+        void addStruct(Struct struct) {
+            structs.add(struct);
         }
     }
 
