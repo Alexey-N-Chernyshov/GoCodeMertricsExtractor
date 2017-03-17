@@ -57,8 +57,11 @@ public class MetricExtractor {
             for (Map.Entry<String, Integer> entry : cyclomaticComplexityVisitor.getComplexity().entrySet()) {
                 sourceFile.addFunction(new Method(entry.getKey(), entry.getValue()));
             }
-            for (Map.Entry<String, HashSet<String>> entry : oopMeasuresVisitor.getStructure().entrySet()) {
-                sourceFile.addStruct(new Struct(entry.getKey(), entry.getValue().size()));
+            System.out.println(oopMeasuresVisitor.getStructures());
+            for (OOPMeasuresVisitor.Structure structure : oopMeasuresVisitor.getStructures()) {
+                sourceFile.addStruct(new Struct(structure.getStructName(),
+                        structure.getMethods().size(),
+                        structure.getAttributes().size()));
             }
             sources.add(sourceFile);
         } catch (Exception e) {
@@ -114,11 +117,14 @@ public class MetricExtractor {
      * - methods attached to structure
      */
     public void printStructMetrics(PrintStream out) {
-        out.println("filename: structName" + SEPARATOR + "methodCount");
+        out.println("filename: structName" + SEPARATOR + "methodCount" + SEPARATOR + "attributesCount");
 
         for (SourceFile s : sources) {
             for (Struct struct : s.structs) {
-                out.println(s.filename + ": " + struct.name + SEPARATOR + struct.methodCount);
+                out.println(s.filename + ": " + struct.name + SEPARATOR +
+                        struct.methodCount + SEPARATOR +
+                        struct.atributesCount
+                );
             }
         }
     }
@@ -196,10 +202,12 @@ public class MetricExtractor {
     class Struct {
         String name;
         int methodCount;
+        int atributesCount;
 
-        Struct(String name, int methodCount) {
+        Struct(String name, int methodCount, int atributesCount) {
             this.name = name;
             this.methodCount = methodCount;
+            this.atributesCount = atributesCount;
         }
     }
 

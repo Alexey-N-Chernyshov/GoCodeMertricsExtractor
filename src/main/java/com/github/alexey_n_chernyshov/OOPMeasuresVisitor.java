@@ -2,6 +2,7 @@ package com.github.alexey_n_chernyshov;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 /**
  * This class counts number of methods and number of attributes per struct
@@ -14,13 +15,15 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         return structures;
     }
 
-
-
     public class Structure {
         private String structName;
 
         private ArrayList<String> methods = new ArrayList<>();
         private ArrayList<String> attributes = new ArrayList<>();
+
+        Structure(String name) {
+            structName = name;
+        }
 
         public ArrayList<String> getMethods() {
             return methods;
@@ -37,7 +40,8 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     class VisitResult {
         String identifier;
-        Node node;
+        List<String> identifierList = new ArrayList<>();
+        boolean isStructType;
     }
 
     @Override
@@ -160,7 +164,15 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     @Override
     public Object visit(ASTIdentifierList node, Object data) {
-        visitAllChildren(node, data);
+        if (data != null) {
+            for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+                VisitResult res = new VisitResult();
+                node.jjtGetChild(i).jjtAccept(this, res);
+                ((VisitResult) data).identifierList.add(res.identifier);
+            }
+        } else {
+            visitAllChildren(node, data);
+        }
         return data;
 
     }
@@ -195,6 +207,9 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     @Override
     public Object visit(ASTStructType node, Object data) {
+        if (data != null) {
+            ((VisitResult) data).isStructType = true;
+        }
         visitAllChildren(node, data);
         return data;
 
@@ -216,7 +231,11 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     @Override
     public Object visit(ASTFieldDecl node, Object data) {
-        visitAllChildren(node, data);
+        VisitResult res = new VisitResult();
+        visitAllChildren(node, res);
+        if (data != null) {
+            ((VisitResult) data).identifierList.addAll(res.identifierList);
+        }
         return data;
 
     }
@@ -527,15 +546,14 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         node.jjtGetChild(1).jjtAccept(this, res);
         String methodName = res.identifier;
 
-        for(Structure s:structures){
+        for (Structure s: structures) {
             if (s.structName.equals(structName)) {
                 isFound = true;
                 s.methods.add(methodName);
             }
         }
-        if(!isFound){
-            Structure structure = new Structure();
-            structure.structName = structName;
+        if (!isFound) {
+            Structure structure = new Structure(structName);
             structure.methods.add(methodName);
             structures.add(structure);
         }
@@ -577,20 +595,22 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
         node.jjtGetChild(0).jjtAccept(this, res);
         String structName = res.identifier;
 
-
-        for(Structure s:structures){
-            if (s.structName.equals(structName)) {
-                isFound = true;
+        if (res.isStructType) {
+            for (Structure s : structures) {
+                if (s.structName.equals(structName)) {
+                    s.attributes.addAll(res.identifierList);
+                    isFound = true;
+                }
             }
-        }
-        if(!isFound){
-            Structure structure = new Structure();
-            structure.structName = structName;
-            structures.add(structure);
+            if (!isFound) {
+                Structure structure = new Structure(structName);
+                structure.attributes.addAll(res.identifierList);
+                structures.add(structure);
+            }
         }
 
         //visit all other children
-        for (int i = 2; i < node.jjtGetNumChildren(); i++) {
+        for (int i = 1; i < node.jjtGetNumChildren(); i++) {
             node.jjtGetChild(i).jjtAccept(this, data);
         }
 
@@ -600,17 +620,9 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
 
     @Override
     public Object visit(ASTTypeSpec node, Object data) {
-        VisitResult res = new VisitResult();
-        boolean isFound = false;
+        visitAllChildren(node, data);
 
-        node.jjtGetChild(1).jjtAccept(this, res);
-        //String atrName = res.identifier;
-
-
-
-        // visitAllChildren(node, data);
         return data;
-
     }
 
     @Override
@@ -652,7 +664,6 @@ public class OOPMeasuresVisitor extends AbstractASTVisitor {
     public Object visit(ASTIdentifier node, Object data) {
         if (data != null) {
             ((VisitResult) data).identifier = (String) node.value;
-            ((VisitResult) data).node = node;
         }
         visitAllChildren(node, data);
         return data;
