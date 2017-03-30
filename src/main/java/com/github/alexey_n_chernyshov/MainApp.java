@@ -17,24 +17,12 @@ public class MainApp {
         try {
             MetricExtractor me = new MetricExtractor();
             me.parseDir(args[0]);
-//            me.printReport();
+//            me.printReport(); // prints to the System.out
             me.printReportFiles();
-            System.out.print(me.totalParsed + "/" + me.getProblemFilesCount());
+            System.out.print("Finished! Total parsed: " + me.totalParsed + ", problem files: " + me.getProblemFilesCount());
         } catch (Exception e) {
             System.out.println(e);
         }
-
-//        Preprocessor p = new Preprocessor();
-//        GoParser parser = new GoParser(p.addSemicolons(new FileInputStream(args[0])));
-//        SimpleNode root = parser.getRoot();
-//
-//        System.out.println("Abstract Syntax Tree:");
-//        root.dump(" ");
-//
-//        System.out.println();
-//        System.out.println("Program:");
-//        PrintVisitor pv = new PrintVisitor(System.out);
-//        root.jjtAccept(pv, null);
     }
 
 }

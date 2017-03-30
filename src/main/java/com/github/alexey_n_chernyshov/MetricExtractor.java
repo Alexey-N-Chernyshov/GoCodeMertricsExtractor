@@ -27,6 +27,9 @@ public class MetricExtractor {
      * List of files not parsed.
      */
     List<ProblemFile> problemFiles = new ArrayList<>();
+    /**
+     * Total number of files parsed.
+     */
     int totalParsed = 0;
 
     /**
@@ -57,7 +60,6 @@ public class MetricExtractor {
             for (Map.Entry<String, Integer> entry : cyclomaticComplexityVisitor.getComplexity().entrySet()) {
                 sourceFile.addFunction(new Method(entry.getKey(), entry.getValue()));
             }
-            System.out.println(oopMeasuresVisitor.getStructures());
             for (OOPMeasuresVisitor.Structure structure : oopMeasuresVisitor.getStructures()) {
                 sourceFile.addStruct(new Struct(structure.getStructName(),
                         structure.getMethods().size(),
@@ -95,8 +97,8 @@ public class MetricExtractor {
                 "statementCount" + SEPARATOR +
                 "structuresCount" + SEPARATOR +
                 "functionsCount" + SEPARATOR +
-                "cyclomaticComplexityMean" + SEPARATOR +
-                "cyclomaticComlexityMax"
+                "AvgCyclomaticComplexity" + SEPARATOR +
+                "MaxCyclomaticComlexity"
         );
         sources.forEach((s) -> {
             out.println(s.filename + SEPARATOR +
@@ -163,8 +165,10 @@ public class MetricExtractor {
         printMethodMetrics(new PrintStream(new FileOutputStream("methodMetrics.txt")));
     }
 
+    /**
+     * Represents the file with problem encountered.
+     */
     class ProblemFile {
-
         String filename;
         String problem;
 
